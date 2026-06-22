@@ -1,12 +1,12 @@
 # Hydroponic Monitoring System Simulator
 
-Multi-zone hydroponic monitoring platform with distributed resource arbitration for central-tank nutrient allocation, implemented as Docker-Compose microservices.
+Multi-zone hydroponic monitoring platform with central-tank nutrient **resource arbitration**, built as Docker-Compose microservices.
 
-## Getting Started
+## Run
 
 ```bash
-cp .env.example .env
+cp .env.example .env   # then fill in secrets
 docker compose up
 ```
 
-Access the application at `hydroponic.localhost`.
+App host (local demo, HTTP): `hydroponic.localhost`

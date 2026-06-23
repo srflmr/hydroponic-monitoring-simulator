@@ -37,10 +37,16 @@ def get_capacity() -> float:
 
 
 def set_volume(new_volume: float) -> None:
-    """Write-through: update the Redis cache and the Postgres source of truth."""
-    r.set(TANK_VOLUME_KEY, new_volume)
+    """Write-through: update the Postgres source of truth first, then the Redis
+    cache. If the Postgres write fails, the cache is left untouched so it never
+    leads the source of truth."""
     db.update_tank_volume(new_volume)
+    r.set(TANK_VOLUME_KEY, new_volume)
 
 
 def ping() -> None:
     r.ping()
+
+
+def brpop(key: str, timeout: int):
+    return r.brpop(key, timeout=timeout)

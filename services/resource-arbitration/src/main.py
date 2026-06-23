@@ -96,11 +96,8 @@ def _process(request):
 
 
 def _consume_loop():
-    host, port = _broker_host_port(MQTT_BROKER_URL)
-    client.connect(host, port, keepalive=60)
-    client.loop_start()
     while True:
-        item = tank_manager.r.brpop(RESOURCE_QUEUE, timeout=5)
+        item = tank_manager.brpop(RESOURCE_QUEUE, timeout=5)
         if item is None:
             continue
         _, raw = item
@@ -150,6 +147,9 @@ def logs(limit: int = 50, offset: int = 0):
 
 def start():
     tank_manager.init_from_postgres()
+    host, port = _broker_host_port(MQTT_BROKER_URL)
+    client.connect(host, port, keepalive=60)
+    client.loop_start()
     threading.Thread(target=_consume_loop, daemon=True).start()
 
 

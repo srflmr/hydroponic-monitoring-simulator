@@ -150,3 +150,26 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+
+  # NEVER scale this service — it is the single source of truth for tank volume.
+  resource-arbitration:
+    build: ./services/resource-arbitration
+    environment:
+      POSTGRES_URL: ${POSTGRES_URL}
+      REDIS_URL: ${REDIS_URL}
+      MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+    networks:
+      - internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:3004/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s

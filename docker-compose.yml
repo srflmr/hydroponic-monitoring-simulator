@@ -131,3 +131,22 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
+  zone-evaluator:
+    build: ./services/zone-evaluator
+    environment:
+      REDIS_URL: ${REDIS_URL}
+      ZONE_CONFIG_URL: http://zone-config:3003
+    networks:
+      - internal
+    depends_on:
+      redis:
+        condition: service_healthy
+      zone-config:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:3002/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s

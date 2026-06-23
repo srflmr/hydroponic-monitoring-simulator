@@ -101,7 +101,7 @@ def simulate(body: SimulateBody):
             content={"error": "invalid_param", "message": "Parameter tidak dikenal"},
         )
     with _lock:
-        expires_at = time.time() + body.duration_seconds if body.duration_seconds else None
+        expires_at = time.time() + body.duration_seconds if body.duration_seconds is not None else None
         _overrides[body.param] = {"value": body.value, "expires_at": expires_at}
     return {"status": "accepted", "param": body.param, "value": body.value}
 
@@ -110,4 +110,5 @@ def start():
     threading.Thread(target=_publish_loop, daemon=True).start()
 
 
-start()
+if os.environ.get("ZONE_ID"):
+    start()

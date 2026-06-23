@@ -1,0 +1,25 @@
+http:
+  routers:
+    authelia:
+      rule: "Host(`auth.hydroponic.localhost`)"
+      entryPoints:
+        - websecure
+      service: authelia
+      tls: {}
+
+  services:
+    authelia:
+      loadBalancer:
+        servers:
+          - url: "http://authelia:9091"
+
+  middlewares:
+    authelia:
+      forwardAuth:
+        address: "http://authelia:9091/api/authz/forward-auth"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - Remote-User
+          - Remote-Groups
+          - Remote-Name
+          - Remote-Email

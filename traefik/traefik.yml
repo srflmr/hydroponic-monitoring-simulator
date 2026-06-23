@@ -1,0 +1,13 @@
+entryPoints:
+  web:
+    address: ':80'
+
+providers:
+  docker:
+    exposedByDefault: false
+    endpoint: "unix:///run/docker-proxy/docker.sock"
+
+log:
+  level: INFO
+
+accessLog: {}

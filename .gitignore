@@ -16,3 +16,7 @@ dist/
 
 # Infra runtime data (named volumes are used; ignore any stray bind dumps)
 *.log
+
+# Authelia runtime artifacts
+authelia/db.sqlite3
+authelia/notification.txt

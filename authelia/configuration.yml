@@ -1,0 +1,37 @@
+theme: light
+
+server:
+  address: 'tcp://0.0.0.0:9091'
+
+log:
+  level: info
+
+identity_validation:
+  reset_password:
+    jwt_secret: 'set-via-env'
+
+authentication_backend:
+  file:
+    path: /config/users_database.yml
+
+access_control:
+  default_policy: one_factor
+
+session:
+  secret: 'set-via-env'
+  cookies:
+    - domain: 'hydroponic.localhost'
+      authelia_url: 'https://auth.hydroponic.localhost'
+      default_redirection_url: 'https://hydroponic.localhost'
+      name: 'authelia_session'
+      expiration: '1h'
+      inactivity: '5m'
+
+storage:
+  encryption_key: 'set-via-env'
+  local:
+    path: /config/db.sqlite3
+
+notifier:
+  filesystem:
+    filename: /config/notification.txt

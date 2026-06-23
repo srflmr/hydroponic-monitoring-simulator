@@ -1,0 +1,8 @@
+users:
+  operator:
+    disabled: false
+    displayname: 'Operator'
+    password: '$argon2id$v=19$m=65536,t=3,p=4$zdAObqDGeFEapMtExyyn8g$JoBA8/EFOG/rw0xwPej+vIO3qmrVZuDmc4PqROeiFdk'
+    email: operator@hydroponic.localhost
+    groups:
+      - operators

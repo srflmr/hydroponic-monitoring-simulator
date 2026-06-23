@@ -4,8 +4,10 @@ const { fetchLogs } = require('../clients/upstream');
 const router = express.Router();
 
 router.get('/api/logs', async (req, res) => {
-  const limit = Math.min(Number.parseInt(req.query.limit, 10) || 50, 200);
-  const offset = Number.parseInt(req.query.offset, 10) || 0;
+  const parsedLimit = Number.parseInt(req.query.limit, 10);
+  const limit = Math.min(Number.isNaN(parsedLimit) ? 50 : parsedLimit, 200);
+  const parsedOffset = Number.parseInt(req.query.offset, 10);
+  const offset = Math.max(0, Number.isNaN(parsedOffset) ? 0 : parsedOffset);
   try {
     const logs = await fetchLogs(limit, offset);
     return res.json(logs);

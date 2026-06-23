@@ -106,3 +106,28 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+
+  telemetry-ingestion:
+    build: ./services/telemetry-ingestion
+    environment:
+      MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+      INFLUXDB_URL: ${INFLUXDB_URL}
+      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+      INFLUXDB_ORG: ${INFLUXDB_ORG}
+      INFLUXDB_BUCKET: ${INFLUXDB_BUCKET}
+      REDIS_URL: ${REDIS_URL}
+    networks:
+      - internal
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+      influxdb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s

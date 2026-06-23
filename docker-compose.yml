@@ -25,6 +25,9 @@ services:
       - ./traefik/dynamic:/etc/traefik/dynamic:ro
     networks:
       - proxy
+    depends_on:
+      authelia:
+        condition: service_healthy
 
   authelia:
     image: authelia/authelia:4.38.17

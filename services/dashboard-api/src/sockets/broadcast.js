@@ -17,7 +17,8 @@ async function refreshValidZones() {
 }
 
 function initSockets(httpServer) {
-  io = new Server(httpServer, { path: '/socket.io', cors: { origin: '*' } });
+  const corsOrigin = process.env.CORS_ORIGIN || 'https://hydroponic.localhost';
+  io = new Server(httpServer, { path: '/socket.io', cors: { origin: corsOrigin } });
   refreshValidZones();
   setInterval(refreshValidZones, VALID_ZONES_REFRESH_MS);
 

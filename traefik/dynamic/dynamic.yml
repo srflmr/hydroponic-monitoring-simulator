@@ -7,11 +7,25 @@ http:
       service: authelia
       tls: {}
 
+    dashboard-ws:
+      rule: "Host(`hydroponic.localhost`) && PathPrefix(`/socket.io`)"
+      entryPoints:
+        - websecure
+      service: dashboard-ws
+      middlewares:
+        - authelia
+      tls: {}
+
   services:
     authelia:
       loadBalancer:
         servers:
           - url: "http://authelia:9091"
+
+    dashboard-ws:
+      loadBalancer:
+        servers:
+          - url: "http://dashboard-api:3010"
 
   middlewares:
     authelia:

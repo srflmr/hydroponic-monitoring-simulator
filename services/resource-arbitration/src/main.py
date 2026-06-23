@@ -32,7 +32,12 @@ def _on_connect(c, userdata, flags, rc):
         _connected.set()
 
 
+def _on_disconnect(c, userdata, rc):
+    _connected.clear()
+
+
 client.on_connect = _on_connect
+client.on_disconnect = _on_disconnect
 
 
 def _now():

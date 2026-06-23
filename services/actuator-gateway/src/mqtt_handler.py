@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 import paho.mqtt.client as mqtt
 
-MQTT_BROKER_URL = os.environ["MQTT_BROKER_URL"]
+MQTT_BROKER_URL = os.environ.get("MQTT_BROKER_URL", "")
 KOMANDO_TOPIC = "hydroponic/+/aktuator/komando"
 SIMULATED_DELAY_SECONDS = float(os.environ.get("ACTUATOR_DELAY_SECONDS", "1.5"))
 
@@ -26,12 +26,16 @@ class ActuatorGateway:
         self.client = mqtt.Client(client_id="actuator-gateway")
         self.client.on_connect = self._on_connect
         self.client.on_message = self._on_message
+        self.client.on_disconnect = self._on_disconnect
         self.connected = False
 
     def _on_connect(self, c, userdata, flags, rc):
         if rc == 0:
             self.connected = True
             c.subscribe(KOMANDO_TOPIC)
+
+    def _on_disconnect(self, c, userdata, rc):
+        self.connected = False
 
     def _on_message(self, c, userdata, msg):
         # Handle in a short-lived thread so the simulated delay never blocks
@@ -41,7 +45,7 @@ class ActuatorGateway:
     def _handle(self, payload):
         try:
             komando = json.loads(payload.decode())
-        except json.JSONDecodeError:
+        except (json.JSONDecodeError, UnicodeDecodeError):
             return
         zone_id = komando.get("zone_id")
         request_id = komando.get("request_id")

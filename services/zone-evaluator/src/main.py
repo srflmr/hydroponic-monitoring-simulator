@@ -31,7 +31,7 @@ def _make_request(reading, threshold_min):
         "request_id": f"req-{uuid.uuid4().hex[:8]}",
         "zone_id": reading["zone_id"],
         "param_violated": "ec",
-        "current_value": reading["ec"],
+        "current_value": reading.get("ec"),
         "threshold_min": threshold_min,
         "requested_at": _now_iso(),
     }
@@ -70,7 +70,11 @@ def _consume_loop():
             reading = json.loads(raw)
         except json.JSONDecodeError:
             continue
-        _process(reading)
+        try:
+            _process(reading)
+        except Exception as err:
+            print(f"zone-evaluator: failed to process reading: {err}", flush=True)
+            continue
 
 
 app = FastAPI()

@@ -9,7 +9,13 @@ const writeApi = influx.getWriteApi(
   process.env.INFLUXDB_ORG,
   process.env.INFLUXDB_BUCKET,
   'ms',
-  { flushInterval: 2000, batchSize: 10 },
+  {
+    flushInterval: 2000,
+    batchSize: 10,
+    writeFailed: (err) => {
+      console.error('InfluxDB write error:', err.message);
+    },
+  },
 );
 
 function writeReading(payload) {

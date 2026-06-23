@@ -8,7 +8,9 @@ function startSubscriber() {
   const client = mqtt.connect(process.env.MQTT_BROKER_URL);
 
   client.on('connect', () => {
-    client.subscribe(SENSOR_TOPIC);
+    client.subscribe(SENSOR_TOPIC, (err) => {
+      if (err) console.error('MQTT subscribe failed:', err.message);
+    });
   });
 
   client.on('message', async (topic, message) => {
@@ -18,8 +20,12 @@ function startSubscriber() {
     } catch (err) {
       return;
     }
-    writeReading(payload);
-    await forwardReading(payload);
+    try {
+      writeReading(payload);
+      await forwardReading(payload);
+    } catch (err) {
+      console.error('Failed to process message:', err.message);
+    }
   });
 
   return client;

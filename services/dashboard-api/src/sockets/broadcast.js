@@ -5,7 +5,7 @@ const { fetchZones } = require('../clients/upstream');
 const VALID_ZONES_REFRESH_MS = 30000;
 
 let io = null;
-let validZoneIds = [];
+let validZoneIds = ['zone-a', 'zone-b', 'zone-c'];
 
 async function refreshValidZones() {
   try {

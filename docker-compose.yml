@@ -173,3 +173,19 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+
+  actuator-gateway:
+    build: ./services/actuator-gateway
+    environment:
+      MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+    networks:
+      - internal
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:3005/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s

@@ -244,3 +244,24 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
+  frontend-web:
+    build: ./services/frontend-web
+    environment:
+      DASHBOARD_API_INTERNAL_URL: http://dashboard-api:3010
+      PORT: "3000"
+      ORIGIN: https://hydroponic.localhost
+    networks:
+      - internal
+      - proxy
+    depends_on:
+      dashboard-api:
+        condition: service_healthy
+      authelia:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s

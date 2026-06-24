@@ -14,6 +14,17 @@ http:
       service: dashboard-ws
       middlewares:
         - authelia
+      priority: 100
+      tls: {}
+
+    frontend:
+      rule: "Host(`hydroponic.localhost`)"
+      entryPoints:
+        - websecure
+      service: frontend
+      middlewares:
+        - authelia
+      priority: 10
       tls: {}
 
   services:
@@ -26,6 +37,11 @@ http:
       loadBalancer:
         servers:
           - url: "http://dashboard-api:3010"
+
+    frontend:
+      loadBalancer:
+        servers:
+          - url: "http://frontend-web:3000"
 
   middlewares:
     authelia:

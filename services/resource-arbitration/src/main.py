@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 import paho.mqtt.client as mqtt
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from . import db, tank_manager
 from .arbitration import build_reason, plan_decisions
@@ -90,6 +90,10 @@ def _score_request(request: dict) -> float:
 def _enqueue(request: dict, score: float) -> None:
     global _seq
     rid = request["request_id"]
+    if rid in _requests:
+        # Refresh score only; the existing heap entry already references this rid.
+        _requests[rid] = {**request, "score": score}
+        return
     _requests[rid] = {**request, "score": score}
     heapq.heappush(_heap, (-score, _seq, rid))
     _seq += 1
@@ -268,7 +272,7 @@ def logs(limit: int = 50, offset: int = 0):
 
 
 class RefillBody(BaseModel):
-    amount: float | None = None
+    amount: float | None = Field(default=None, ge=0)
 
 
 class RequestBody(BaseModel):
@@ -284,7 +288,7 @@ def tank_refill(body: RefillBody):
     with _arb_lock:
         capacity = tank_manager.get_capacity()
         current = tank_manager.get_current_volume()
-        target = capacity if body.amount is None else min(capacity, round(current + body.amount, 2))
+        target = max(0.0, capacity if body.amount is None else min(capacity, round(current + body.amount, 2)))
         tank_manager.set_volume(target)
         serve()
     return tank_status()

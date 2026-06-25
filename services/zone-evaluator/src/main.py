@@ -14,7 +14,6 @@ from .zone_config_client import get_thresholds
 REDIS_URL = os.environ["REDIS_URL"]
 TELEMETRY_QUEUE = "queue:telemetry_for_evaluation"
 RESOURCE_QUEUE = "queue:resource_requests"
-PORT = int(os.environ.get("EVALUATOR_PORT", "3002"))
 
 r = redis.from_url(REDIS_URL, decode_responses=True)
 

@@ -13,7 +13,6 @@ from .arbitration import decide_allocation
 MQTT_BROKER_URL = os.environ["MQTT_BROKER_URL"]
 RESOURCE_QUEUE = "queue:resource_requests"
 ALLOCATION_VOLUME_LITER = float(os.environ.get("ALLOCATION_VOLUME_LITER", "5"))
-PORT = int(os.environ.get("ARBITRATION_PORT", "3004"))
 
 _connected = threading.Event()
 

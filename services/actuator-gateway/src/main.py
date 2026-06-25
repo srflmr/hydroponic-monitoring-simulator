@@ -5,8 +5,6 @@ from fastapi.responses import JSONResponse
 
 from .mqtt_handler import ActuatorGateway
 
-PORT = int(os.environ.get("ACTUATOR_PORT", "3005"))
-
 gateway = ActuatorGateway()
 
 app = FastAPI()

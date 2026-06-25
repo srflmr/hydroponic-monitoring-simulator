@@ -15,7 +15,6 @@ ZONE_ID = os.environ["ZONE_ID"]
 DEVICE_ID = os.environ.get("DEVICE_ID", "sensor-01")
 MQTT_BROKER_URL = os.environ["MQTT_BROKER_URL"]
 PUBLISH_INTERVAL_SECONDS = float(os.environ.get("PUBLISH_INTERVAL_SECONDS", "4"))
-PORT = int(os.environ.get("SENSOR_PORT", "3006"))
 
 PARAMS = ["ph", "ec", "water_temp_c", "water_level_pct"]
 
@@ -100,10 +99,12 @@ def simulate(body: SimulateBody):
             status_code=400,
             content={"error": "invalid_param", "message": "Parameter tidak dikenal"},
         )
+    low, high = PARAM_BOUNDS[body.param]
+    value = max(low, min(high, body.value))  # clamp to the sensor's physical range
     with _lock:
         expires_at = time.time() + body.duration_seconds if body.duration_seconds is not None else None
-        _overrides[body.param] = {"value": body.value, "expires_at": expires_at}
-    return {"status": "accepted", "param": body.param, "value": body.value}
+        _overrides[body.param] = {"value": value, "expires_at": expires_at}
+    return {"status": "accepted", "param": body.param, "value": value}
 
 
 def start():

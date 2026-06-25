@@ -2,8 +2,15 @@ import { fail } from '@sveltejs/kit';
 import { fetchZones, fetchTank, postSimulate } from '$lib/api-client';
 
 export async function load() {
-  const [zones, tank] = await Promise.all([fetchZones(), fetchTank()]);
-  return { zones, tank };
+  try {
+    const [zones, tank] = await Promise.all([fetchZones(), fetchTank()]);
+    return { zones, tank };
+  } catch (err) {
+    // dashboard-api unreachable at render time — render an empty shell;
+    // live values still arrive over the WebSocket once it connects.
+    console.error('dashboard-api unreachable during SSR:', err.message);
+    return { zones: [], tank: {} };
+  }
 }
 
 export const actions = {

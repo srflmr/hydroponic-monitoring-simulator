@@ -51,7 +51,7 @@
 
   $: capacity = num(tank.capacity) ?? 0;
   $: volume = num(tank.current_volume) ?? 0;
-  $: tankPct = capacity > 0 ? Math.round((volume / capacity) * 1000) / 10 : 0;
+  $: tankPct = capacity > 0 ? Math.min(100, Math.round((volume / capacity) * 1000) / 10) : 0;
   $: tankLow = capacity > 0 && tankPct <= 15;
   $: criticalCount = zones.filter(isCritical).length;
 </script>

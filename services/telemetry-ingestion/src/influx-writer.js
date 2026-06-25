@@ -18,6 +18,24 @@ const writeApi = influx.getWriteApi(
   },
 );
 
+async function pingInflux(timeoutMs = 2000) {
+  const url = process.env.INFLUXDB_URL;
+  if (!url) return false;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${url.replace(/\/$/, '')}/ping`, {
+      signal: controller.signal,
+    });
+    // InfluxDB 2.x /ping returns 204 No Content when healthy.
+    return res.status === 204 || res.ok;
+  } catch (err) {
+    return false;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function writeReading(payload) {
   const point = new Point('sensor_reading')
     .tag('zone_id', payload.zone_id)
@@ -29,4 +47,4 @@ function writeReading(payload) {
   writeApi.writePoint(point);
 }
 
-module.exports = { writeReading };
+module.exports = { writeReading, pingInflux };

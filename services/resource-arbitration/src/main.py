@@ -187,7 +187,16 @@ def intake(requests: list) -> None:
     """Score a batch of incoming requests, enqueue them, and run a serve round."""
     with _arb_lock:
         for request in requests:
-            if request.get("zone_id") is None or request.get("request_id") is None:
+            rid = request.get("request_id")
+            zid = request.get("zone_id")
+            if zid is None or rid is None:
+                print(f"resource-arbitration: skipping request missing zone_id/request_id: {request}", flush=True)
+                continue
+            try:
+                float(request["current_value"])
+                float(request["threshold_min"])
+            except (KeyError, TypeError, ValueError):
+                print(f"resource-arbitration: skipping malformed request {rid!r} zone={zid!r}: invalid current_value/threshold_min", flush=True)
                 continue
             score = _score_request(request)
             _enqueue(request, score)

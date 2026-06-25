@@ -1,0 +1,58 @@
+<script>
+  import { farm } from '$lib/sim.js';
+  import ZoneCard from '$lib/components/ZoneCard.svelte';
+  import TankGauge from '$lib/components/TankGauge.svelte';
+  import ArbitrationLog from '$lib/components/ArbitrationLog.svelte';
+
+  $: zones = $farm.zones;
+  $: serving = $farm.serving;
+  $: servingCount = Object.keys(serving).length;
+  $: logsTop = $farm.logs.slice(0, 6);
+  $: tankPct = Math.round(($farm.tank.volume / $farm.tank.capacity) * 100);
+</script>
+
+<svelte:head><title>Live overview · Kanopi</title></svelte:head>
+
+<section class="page">
+  <div class="pagehead">
+    <div class="intro">
+      <span class="h">Live overview</span>
+      <span class="s">All zones updating in real time · select a zone for detail</span>
+    </div>
+    {#if tankPct < 20}
+      <div class="alert">
+        <span class="adot"></span>
+        <span>Tank low — refill required</span>
+      </div>
+    {/if}
+  </div>
+
+  <div class="zones">
+    {#each zones as zone (zone.id)}
+      <ZoneCard {zone} flow={!!serving[zone.id]} queued={$farm.queue.includes(zone.id)} />
+    {/each}
+  </div>
+
+  <div class="bottom">
+    <TankGauge tank={$farm.tank} serving={servingCount} />
+    <ArbitrationLog logs={logsTop} variant="row" />
+  </div>
+</section>
+
+<style>
+  .page { padding: 30px clamp(16px, 4vw, 32px) 40px; display: flex; flex-direction: column; gap: 22px; }
+  .pagehead { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+  .intro { display: flex; flex-direction: column; gap: 4px; }
+  .intro .h { font-size: 24px; font-weight: 700; letter-spacing: -.01em; }
+  .intro .s { font-size: 14px; color: var(--ink-3); }
+  .alert { display: flex; align-items: center; gap: 9px; padding: 9px 15px; border-radius: 12px; background: var(--crit-soft); }
+  .alert .adot { width: 8px; height: 8px; border-radius: 50%; background: var(--crit-ring); animation: livePulse 1.4s ease-in-out infinite; }
+  .alert span:last-child { font-size: 13px; font-weight: 600; color: var(--crit); }
+
+  .zones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .bottom { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 20px; }
+
+  @media (max-width: 1180px) { .zones { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 900px)  { .bottom { grid-template-columns: 1fr; } }
+  @media (max-width: 620px)  { .zones { grid-template-columns: 1fr; } }
+</style>

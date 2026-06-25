@@ -1,6 +1,11 @@
-import { env } from '$env/dynamic/private';
+import { browser } from '$app/environment';
 
-const BASE = env.DASHBOARD_API_INTERNAL_URL || 'http://dashboard-api:3010';
+// On the server (SSR / server load functions) we call dashboard-api directly
+// over the internal Docker network.  In the browser we use a relative path so
+// requests go through Traefik (same-origin) — $env/dynamic/private cannot be
+// imported in a module that is also bundled for the client.
+// eslint-disable-next-line no-undef
+const BASE = browser ? '' : (typeof process !== 'undefined' ? (process.env.DASHBOARD_API_INTERNAL_URL || 'http://dashboard-api:3010') : 'http://dashboard-api:3010');
 
 export async function fetchZones() {
   const res = await fetch(`${BASE}/api/zones`);

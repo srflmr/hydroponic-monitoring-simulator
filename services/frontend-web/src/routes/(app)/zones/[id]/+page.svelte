@@ -1,0 +1,147 @@
+<script>
+  import { page } from '$app/stores';
+  import { goto } from '$app/navigation';
+  import { farm } from '$lib/sim.js';
+  import { metric, zoneStatus, RANGE } from '$lib/data.js';
+  import Ring from '$lib/components/Ring.svelte';
+  import Chart from '$lib/components/Chart.svelte';
+  import StatusPill from '$lib/components/StatusPill.svelte';
+  import ArbitrationLog from '$lib/components/ArbitrationLog.svelte';
+
+  export let data;
+
+  $: id = $page.params.id;
+  $: zones = $farm.zones;
+  $: zone = zones.find((z) => z.id === id) || zones[0];
+  $: status = zoneStatus(zone);
+
+  $: rings = [
+    { ...metric('ph', zone.ph, zone.th.phMin, zone.th.phMax), label: 'pH' },
+    { ...metric('ec', zone.ec, zone.th.ecMin, zone.th.ecMax), label: 'EC' },
+    { ...metric('temp', zone.temp, zone.th.tempMin, zone.th.tempMax), label: 'Temp' },
+    { ...metric('level', zone.level, 80, 100), label: 'Water' }
+  ];
+
+  $: hist = data.history;
+  $: charts = [
+    { signal: 'ec', label: 'EC', series: hist.ec, lo: zone.th.ecMin, hi: zone.th.ecMax },
+    { signal: 'ph', label: 'pH', series: hist.ph, lo: zone.th.phMin, hi: zone.th.phMax },
+    { signal: 'temp', label: 'Water temp', series: hist.temp, lo: zone.th.tempMin, hi: zone.th.tempMax },
+    { signal: 'level', label: 'Water level', series: hist.level, lo: 80, hi: 100 }
+  ];
+
+  $: thresholdRows = [
+    { label: 'pH', range: `${zone.th.phMin.toFixed(1)} – ${zone.th.phMax.toFixed(1)}` },
+    { label: 'EC (mS/cm)', range: `${zone.th.ecMin.toFixed(1)} – ${zone.th.ecMax.toFixed(1)}` },
+    { label: 'Water temp (°C)', range: `${zone.th.tempMin.toFixed(0)} – ${zone.th.tempMax.toFixed(0)}` },
+    { label: 'Water level (%)', range: '80 – 100' }
+  ];
+
+  $: zoneLogs = $farm.logs.filter((l) => l.name === zone.name).slice(0, 6);
+</script>
+
+<svelte:head><title>{zone ? zone.crop : 'Zone'} · Kanopi</title></svelte:head>
+
+<section class="page">
+  <div class="controls">
+    <div class="left">
+      <button class="ghost" on:click={() => goto('/')}>← Overview</button>
+      <div class="tabs">
+        {#each zones as z (z.id)}
+          <button class="tab" class:active={z.id === zone.id} on:click={() => goto('/zones/' + z.id)}>{z.crop}</button>
+        {/each}
+      </div>
+    </div>
+    <button class="edit" on:click={() => goto('/config')}>Edit thresholds</button>
+  </div>
+
+  {#if zone}
+  <div class="zhead">
+    <div class="title">
+      <span class="crop">{zone.crop}</span>
+      <span class="sub">{zone.name} · Priority {zone.priority}</span>
+    </div>
+    <div class="zrings">
+      {#each rings as r}
+        <Ring label={r.label} value={r.value} pct={r.pct} ring={r.ring} soft={r.soft} size={76} />
+      {/each}
+      <StatusPill txt={status.txt} soft={status.soft} dot={status.dot} label={status.label} />
+    </div>
+  </div>
+
+  <div class="detail">
+    <div class="charts">
+      {#each charts as c}
+        <Chart signal={c.signal} label={c.label} series={c.series} lo={c.lo} hi={c.hi} />
+      {/each}
+    </div>
+
+    <div class="side">
+      <div class="panel">
+        <span class="cap">Thresholds</span>
+        {#each thresholdRows as r}
+          <div class="trow">
+            <span class="tlabel">{r.label}</span>
+            <span class="trange">{r.range}</span>
+          </div>
+        {/each}
+      </div>
+
+      <div class="panel grow">
+        <div class="phead">
+          <span class="cap">Recent decisions</span>
+          <span class="live"></span>
+        </div>
+        {#if zoneLogs.length === 0}
+          <span class="empty">No arbitration events for this zone yet.</span>
+        {:else}
+          <ArbitrationLog logs={zoneLogs} variant="stack" title="" />
+        {/if}
+      </div>
+    </div>
+  </div>
+  {/if}
+</section>
+
+<style>
+  .page { padding: 24px clamp(16px, 4vw, 32px) 40px; display: flex; flex-direction: column; gap: 22px; }
+
+  .controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  .left { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+  .ghost { border: 1px solid #E2D8C0; background: var(--surface); cursor: pointer; padding: 9px 14px; border-radius: var(--radius-xs); font-family: var(--font); font-size: 14px; font-weight: 600; color: var(--ink-3); }
+  .ghost:hover { background: #F1EADB; }
+  .tabs { display: flex; gap: 7px; flex-wrap: wrap; }
+  .tab { border: 1px solid #E5DBC4; cursor: pointer; padding: 9px 15px; border-radius: var(--radius-xs); font-family: var(--font); font-size: 14px; font-weight: 600; color: var(--ink-2); background: var(--surface); }
+  .tab.active { color: var(--header); background: var(--nutrient); border-color: var(--nutrient); }
+  .edit { border: none; cursor: pointer; padding: 10px 16px; border-radius: var(--radius-xs); background: var(--accent-soft); color: var(--ok); font-family: var(--font); font-size: 14px; font-weight: 700; }
+  .edit:hover { background: #D6E2C0; }
+
+  .zhead {
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 18px;
+    background: var(--surface); border: 1px solid var(--hair); border-radius: 20px; padding: 22px 26px;
+  }
+  .title { display: flex; flex-direction: column; gap: 4px; }
+  .crop { font-size: 26px; font-weight: 700; letter-spacing: -.01em; }
+  .sub { font-size: 14px; color: var(--muted); }
+  .zrings { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+
+  .detail { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; }
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .side { display: flex; flex-direction: column; gap: 18px; }
+  .panel { background: var(--surface); border: 1px solid var(--hair); border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+  .panel.grow { flex: 1; }
+  .cap { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .phead { display: flex; align-items: center; gap: 9px; }
+  .live { width: 7px; height: 7px; border-radius: 50%; background: var(--ok-ring); animation: livePulse 1.8s ease-in-out infinite; }
+  .trow { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--hair-2); }
+  .tlabel { font-size: 14px; color: var(--ink-2); font-weight: 500; }
+  .trange { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--ink); }
+  .empty { font-size: 13px; color: #B6A98E; padding: 8px 0; }
+
+  /* Recent-decisions panel embeds ArbitrationLog; strip its own card chrome */
+  .panel.grow :global(.log) { background: transparent; border: none; border-radius: 0; padding: 0; }
+
+  @media (max-width: 1180px) { .detail { grid-template-columns: 1fr; } }
+  @media (max-width: 900px)  { .zhead { flex-direction: column; align-items: flex-start; } }
+  @media (max-width: 620px)  { .charts { grid-template-columns: 1fr; } }
+</style>

@@ -54,7 +54,8 @@ def _process(reading):
             "violated_params": result["violated_params"],
             "evaluated_at": _now_iso(),
         }
-    if "ec" in result["violated_params"]:
+    ec = reading.get("ec")
+    if ec is not None and ec < thresholds["ec_min"]:
         request = _make_request(reading, thresholds["ec_min"])
         r.lpush(RESOURCE_QUEUE, json.dumps(request))
 

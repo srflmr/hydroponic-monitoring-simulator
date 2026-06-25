@@ -37,7 +37,7 @@
     { label: 'Water level (%)', range: '80 – 100' }
   ];
 
-  $: zoneLogs = $farm.logs.filter((l) => l.name === zone.name).slice(0, 6);
+  $: zoneLogs = $farm.logs.filter((l) => l.zone_id === zone.id).slice(0, 6);
 </script>
 
 <svelte:head><title>{zone ? zone.crop : 'Zone'} · Kanopi</title></svelte:head>

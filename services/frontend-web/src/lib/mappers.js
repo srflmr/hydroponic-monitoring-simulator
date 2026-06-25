@@ -44,6 +44,7 @@ export function mapLog(l) {
   const { name, crop } = splitName(l.zone_name || l.zone_id || '');
   return {
     id: l.id,
+    zone_id: l.zone_id,
     time: fmtTime(l.requested_at),
     name: name || l.zone_id,
     crop,

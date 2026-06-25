@@ -7,7 +7,7 @@
 
 import { writable } from 'svelte/store';
 import { connectSocket } from '$lib/socket';
-import { fetchZones, fetchTank, fetchLogs, refillTank as apiRefill, updateZone } from '$lib/api-client';
+import { fetchZones, refillTank as apiRefill, updateZone } from '$lib/api-client';
 import { splitName, mapZone, mapTank, mapLog } from './mappers.js';
 
 // Re-export pure helpers so callers that previously imported from sim.js still
@@ -88,9 +88,9 @@ export function connectStream() {
   }), 1000);
 
   return () => {
-    clearInterval(clock);
+    clearInterval(clock); clock = null;
     clearInterval(sweep);
-    if (socket) socket.close();
+    if (socket) { socket.close(); socket = null; }
   };
 }
 

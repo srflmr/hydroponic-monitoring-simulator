@@ -137,6 +137,48 @@ services:
       retries: 5
       start_period: 15s
 
+  sensor-simulator-zone-b:
+    build: ./services/sensor-simulator
+    environment:
+      ZONE_ID: zone-b
+      DEVICE_ID: sensor-01
+      MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+      INIT_PH: "5.7"
+      INIT_EC: "1.1"
+      INIT_WATER_TEMP_C: "20.0"
+    networks:
+      - internal
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:3006/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  sensor-simulator-zone-c:
+    build: ./services/sensor-simulator
+    environment:
+      ZONE_ID: zone-c
+      DEVICE_ID: sensor-01
+      MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+      INIT_PH: "6.0"
+      INIT_EC: "1.6"
+      INIT_WATER_TEMP_C: "23.0"
+    networks:
+      - internal
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:3006/health')\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
   telemetry-ingestion:
     build: ./services/telemetry-ingestion
     environment:

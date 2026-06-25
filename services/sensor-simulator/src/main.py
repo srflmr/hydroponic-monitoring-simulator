@@ -18,7 +18,12 @@ PUBLISH_INTERVAL_SECONDS = float(os.environ.get("PUBLISH_INTERVAL_SECONDS", "4")
 
 PARAMS = ["ph", "ec", "water_temp_c", "water_level_pct"]
 
-_state = {"ph": 6.0, "ec": 1.8, "water_temp_c": 25.0, "water_level_pct": 90.0}
+_state = {
+    "ph": float(os.environ.get("INIT_PH", "6.0")),
+    "ec": float(os.environ.get("INIT_EC", "1.8")),
+    "water_temp_c": float(os.environ.get("INIT_WATER_TEMP_C", "25.0")),
+    "water_level_pct": float(os.environ.get("INIT_WATER_LEVEL_PCT", "90.0")),
+}
 _overrides = {}  # param -> {"value": float, "expires_at": float | None}
 _lock = threading.Lock()
 _connected = threading.Event()

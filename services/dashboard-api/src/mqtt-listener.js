@@ -25,18 +25,22 @@ function startMqtt() {
     } catch (err) {
       return;
     }
-    if (topic.endsWith('/sensor/reading')) {
-      broadcastZoneUpdate({
-        zone_id: payload.zone_id,
-        ph: payload.ph,
-        ec: payload.ec,
-        water_temp_c: payload.water_temp_c,
-        water_level_pct: payload.water_level_pct,
-      });
-    } else if (topic.endsWith('/arbitrasi/event')) {
-      if (payload.log) broadcastArbitrationLog(payload.log);
-      if (payload.tank) broadcastTankUpdate(payload.tank);
-      if (payload.alert) broadcastAlert(payload.alert);
+    try {
+      if (topic.endsWith('/sensor/reading')) {
+        broadcastZoneUpdate({
+          zone_id: payload.zone_id,
+          ph: payload.ph,
+          ec: payload.ec,
+          water_temp_c: payload.water_temp_c,
+          water_level_pct: payload.water_level_pct,
+        });
+      } else if (topic.endsWith('/arbitrasi/event')) {
+        if (payload.log) broadcastArbitrationLog(payload.log);
+        if (payload.tank) broadcastTankUpdate(payload.tank);
+        if (payload.alert) broadcastAlert(payload.alert);
+      }
+    } catch (err) {
+      console.error('dashboard-api broadcast error:', err.message);
     }
   });
 

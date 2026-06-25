@@ -1,7 +1,11 @@
 const express = require('express');
 const { fetchZones, fetchZoneCurrent } = require('../clients/upstream');
+const { queryHistory } = require('../clients/influx');
 
 const router = express.Router();
+
+const ALLOWED_PARAMS = new Set(['ph', 'ec', 'water_temp_c', 'water_level_pct']);
+const ISO_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
 
 router.get('/api/zones', async (req, res) => {
   try {
@@ -27,6 +31,31 @@ router.get('/api/zones', async (req, res) => {
     return res
       .status(503)
       .json({ error: 'upstream_unavailable', message: err.message });
+  }
+});
+
+router.get('/api/zones/:zoneId/history', async (req, res) => {
+  const param = req.query.param || 'ec';
+  if (!ALLOWED_PARAMS.has(param)) {
+    return res.status(400).json({ error: 'invalid_param', message: 'param tidak dikenal' });
+  }
+  const { from, to } = req.query;
+  if (from !== undefined && !ISO_RE.test(from)) {
+    return res.status(400).json({ error: 'invalid_from', message: 'from harus ISO-8601 UTC' });
+  }
+  if (to !== undefined && !ISO_RE.test(to)) {
+    return res.status(400).json({ error: 'invalid_to', message: 'to harus ISO-8601 UTC' });
+  }
+  try {
+    const zones = await fetchZones();
+    if (!zones.some((z) => z.zone_id === req.params.zoneId)) {
+      return res.status(404).json({ error: 'zone_not_found', message: 'Zone tidak ditemukan' });
+    }
+    const start = from || '-1h';
+    const points = await queryHistory(req.params.zoneId, param, start, to);
+    return res.json({ zone_id: req.params.zoneId, param, points });
+  } catch (err) {
+    return res.status(503).json({ error: 'upstream_unavailable', message: err.message });
   }
 });
 

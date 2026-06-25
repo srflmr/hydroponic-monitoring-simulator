@@ -275,6 +275,10 @@ services:
       RESOURCE_ARBITRATION_URL: http://resource-arbitration:3004
       MQTT_BROKER_URL: ${MQTT_BROKER_URL}
       CORS_ORIGIN: https://hydroponic.localhost
+      INFLUXDB_URL: ${INFLUXDB_URL}
+      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
+      INFLUXDB_ORG: ${INFLUXDB_ORG}
+      INFLUXDB_BUCKET: ${INFLUXDB_BUCKET}
     networks:
       - internal
       - proxy
@@ -286,6 +290,8 @@ services:
       mosquitto:
         condition: service_healthy
       authelia:
+        condition: service_healthy
+      influxdb:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3010/health || exit 1"]

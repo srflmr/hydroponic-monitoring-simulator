@@ -17,10 +17,23 @@
     return value === null || value === undefined || value === '' ? null : Number(value);
   }
 
-  function isCritical(zone) {
-    const ec = num(zone.last_reading?.ec);
-    const ecMin = num(zone.ec_min);
-    return ec !== null && ecMin !== null && ec < ecMin;
+  const MARGIN = 0.1;
+  function paramStatus(value, lo, hi) {
+    const v = num(value), l = num(lo), h = num(hi);
+    if (v === null || l === null || h === null) return 'normal';
+    if (v < l || v > h) return 'critical';
+    const m = (h - l) * MARGIN;
+    return v < l + m || v > h - m ? 'warning' : 'normal';
+  }
+  const RANK = { normal: 0, warning: 1, critical: 2 };
+  function zoneStatus(zone) {
+    const r = zone.last_reading ?? {};
+    const ss = [
+      paramStatus(r.ph, zone.ph_min, zone.ph_max),
+      paramStatus(r.ec, zone.ec_min, zone.ec_max),
+      paramStatus(r.water_temp_c, zone.temp_min, zone.temp_max),
+    ];
+    return ss.reduce((w, s) => (RANK[s] > RANK[w] ? s : w), 'normal');
   }
 
   function pulse(zoneId) {
@@ -58,7 +71,7 @@
   $: volume = num(tank.current_volume) ?? 0;
   $: tankPct = capacity > 0 ? Math.min(100, Math.round((volume / capacity) * 1000) / 10) : 0;
   $: tankLow = capacity > 0 && tankPct <= 15;
-  $: criticalCount = zones.filter(isCritical).length;
+  $: criticalCount = zones.filter((z) => zoneStatus(z) === 'critical').length;
 </script>
 
 <div class="shell">
@@ -71,6 +84,7 @@
       <span class="status" class:on={connected}>
         <span class="dot"></span>{connected ? 'Live' : 'Connecting'}
       </span>
+      <a href="/logs" class="nav-link">Log</a>
       <span class="op">operator</span>
       <form method="POST" action="?/simulate">
         <input type="hidden" name="zone_id" value="zone-a" />
@@ -112,19 +126,19 @@
       <section class="zones" aria-label="Zones">
         <div class="section-head">
           <h2>Zones</h2>
-          <span class="meta">{criticalCount} drawing nutrient</span>
+          <span class="meta">{criticalCount} critical</span>
         </div>
         <div class="zone-grid">
           {#each zones as zone (zone.zone_id)}
-            {@const critical = isCritical(zone)}
-            <article class="card" class:critical class:flash={flash[zone.zone_id]}>
+            {@const status = zoneStatus(zone)}
+            <article class="card" class:critical={status === 'critical'} class:warning={status === 'warning'} class:flash={flash[zone.zone_id]}>
               <div class="card-top">
-                <h3>{zone.name ?? zone.zone_id}</h3>
-                <span class="tag" class:critical>{critical ? 'EC low' : 'Nominal'}</span>
+                <h3><a href="/zones/{zone.zone_id}">{zone.name ?? zone.zone_id}</a></h3>
+                <span class="tag" class:critical={status === 'critical'} class:warning={status === 'warning'}>{status === 'normal' ? 'Nominal' : status === 'warning' ? 'Warning' : 'Critical'}</span>
               </div>
               <dl class="readings">
                 <div><dt>pH</dt><dd>{zone.last_reading?.ph ?? '—'}</dd></div>
-                <div class:hot={critical}><dt>EC</dt><dd>{zone.last_reading?.ec ?? '—'}</dd></div>
+                <div class:hot={paramStatus(zone.last_reading?.ec, zone.ec_min, zone.ec_max) !== 'normal'}><dt>EC</dt><dd>{zone.last_reading?.ec ?? '—'}</dd></div>
                 <div><dt>Temp</dt><dd>{zone.last_reading?.water_temp_c ?? '—'}<span class="u">°C</span></dd></div>
                 <div><dt>Level</dt><dd>{zone.last_reading?.water_level_pct ?? '—'}<span class="u">%</span></dd></div>
               </dl>
@@ -211,6 +225,14 @@
     0% { box-shadow: 0 0 0 0 rgba(94, 200, 214, 0.5); }
     70%, 100% { box-shadow: 0 0 0 7px rgba(94, 200, 214, 0); }
   }
+  .nav-link {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.08em;
+  }
+  .nav-link:hover { color: var(--text); }
   .op {
     font-family: var(--mono);
     font-size: 0.72rem;
@@ -362,6 +384,7 @@
     transition: box-shadow 0.3s, border-color 0.3s;
   }
   .card.critical { border-left-color: var(--alert); }
+  .card.warning { border-left-color: var(--water); }
   .card.flash { box-shadow: inset 0 0 0 1px var(--water); }
   .card-top {
     display: flex;
@@ -385,6 +408,11 @@
     color: var(--alert);
     border-color: rgba(239, 122, 82, 0.45);
   }
+  .tag.warning {
+    color: var(--water);
+    border-color: rgba(94, 200, 214, 0.45);
+  }
+  .card-top h3 a { color: inherit; text-decoration: none; }
   .readings {
     display: grid;
     grid-template-columns: 1fr 1fr;

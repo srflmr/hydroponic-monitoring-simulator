@@ -18,6 +18,12 @@ export async function fetchTank() {
   return res.json();
 }
 
+export async function fetchLogs(limit = 50, offset = 0) {
+  const res = await fetch(`${BASE}/api/logs?limit=${limit}&offset=${offset}`);
+  if (!res.ok) throw new Error(`logs ${res.status}`);
+  return res.json();
+}
+
 export async function postSimulate(zoneId, param, value, durationSeconds) {
   const res = await fetch(`${BASE}/api/simulate`, {
     method: 'POST',

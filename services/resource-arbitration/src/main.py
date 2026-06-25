@@ -281,12 +281,12 @@ class RequestBody(BaseModel):
 
 @app.post("/tank/refill")
 def tank_refill(body: RefillBody):
-    capacity = tank_manager.get_capacity()
-    current = tank_manager.get_current_volume()
-    target = capacity if body.amount is None else min(capacity, round(current + body.amount, 2))
-    tank_manager.set_volume(target)
     with _arb_lock:
-        serve()  # reprocess queued requests in priority order
+        capacity = tank_manager.get_capacity()
+        current = tank_manager.get_current_volume()
+        target = capacity if body.amount is None else min(capacity, round(current + body.amount, 2))
+        tank_manager.set_volume(target)
+        serve()
     return tank_status()
 
 

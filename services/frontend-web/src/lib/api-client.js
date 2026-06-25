@@ -24,6 +24,12 @@ export async function fetchLogs(limit = 50, offset = 0) {
   return res.json();
 }
 
+export async function fetchHistory(zoneId, param = 'ec') {
+  const res = await fetch(`${BASE}/api/zones/${zoneId}/history?param=${param}`);
+  if (!res.ok) throw new Error(`history ${res.status}`);
+  return res.json();
+}
+
 export async function postSimulate(zoneId, param, value, durationSeconds) {
   const res = await fetch(`${BASE}/api/simulate`, {
     method: 'POST',

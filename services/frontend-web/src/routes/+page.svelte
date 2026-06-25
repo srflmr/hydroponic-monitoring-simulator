@@ -11,6 +11,7 @@
   let connected = false;
   let flash = {};
   let socket;
+  let alert = null;
 
   function num(value) {
     return value === null || value === undefined || value === '' ? null : Number(value);
@@ -45,6 +46,10 @@
     socket.on('zone:update', (reading) => applyReading(reading));
     socket.on('tank:update', (update) => (tank = { ...tank, ...update }));
     socket.on('arbitration:log', (log) => (logs = [{ ...log, _id: log.id ?? `${Date.now()}` }, ...logs].slice(0, 24)));
+    socket.on('alert', (a) => {
+      alert = a;
+      setTimeout(() => { if (alert === a) alert = null; }, 8000);
+    });
   });
 
   onDestroy(() => socket && socket.close());
@@ -78,6 +83,13 @@
     <p class="toast ok" role="status">Triggered. Watch Zone A draw from the reservoir.</p>
   {:else if form?.error}
     <p class="toast err" role="status">Couldn't reach the simulator. Try again.</p>
+  {/if}
+
+  {#if alert}
+    <p class="toast alert {alert.severity}" role="alert">
+      <strong>{alert.zone_id}</strong> — {alert.message}
+      <button class="dismiss" on:click={() => (alert = null)} aria-label="Tutup">×</button>
+    </p>
   {/if}
 
   <div class="grid">
@@ -231,6 +243,10 @@
   }
   .toast.ok { color: var(--nutrient); border-color: rgba(69, 200, 154, 0.4); }
   .toast.err { color: var(--alert); border-color: rgba(239, 122, 82, 0.4); }
+  .toast.alert { display: flex; align-items: center; gap: 0.6rem; }
+  .toast.alert.critical { color: var(--alert); border-color: rgba(239, 122, 82, 0.55); }
+  .toast.alert.warning { color: var(--nutrient); border-color: rgba(69, 200, 154, 0.45); }
+  .dismiss { margin-left: auto; background: none; border: none; color: inherit; font-size: 1.1rem; cursor: pointer; }
 
   .grid {
     display: grid;

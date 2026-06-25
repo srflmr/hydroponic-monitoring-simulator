@@ -1,5 +1,5 @@
 const express = require('express');
-const { fetchZones, fetchZoneCurrent } = require('../clients/upstream');
+const { fetchZones, fetchZoneCurrent, forwardZoneWrite } = require('../clients/upstream');
 const { queryHistory } = require('../clients/influx');
 
 const router = express.Router();
@@ -54,6 +54,33 @@ router.get('/api/zones/:zoneId/history', async (req, res) => {
     const start = from || '-1h';
     const points = await queryHistory(req.params.zoneId, param, start, to);
     return res.json({ zone_id: req.params.zoneId, param, points });
+  } catch (err) {
+    return res.status(503).json({ error: 'upstream_unavailable', message: err.message });
+  }
+});
+
+router.post('/api/zones', async (req, res) => {
+  try {
+    const { status, body } = await forwardZoneWrite('POST', '/zones', req.body);
+    return res.status(status).json(body);
+  } catch (err) {
+    return res.status(503).json({ error: 'upstream_unavailable', message: err.message });
+  }
+});
+
+router.put('/api/zones/:zoneId', async (req, res) => {
+  try {
+    const { status, body } = await forwardZoneWrite('PUT', `/zones/${encodeURIComponent(req.params.zoneId)}`, req.body);
+    return res.status(status).json(body);
+  } catch (err) {
+    return res.status(503).json({ error: 'upstream_unavailable', message: err.message });
+  }
+});
+
+router.delete('/api/zones/:zoneId', async (req, res) => {
+  try {
+    const { status, body } = await forwardZoneWrite('DELETE', `/zones/${encodeURIComponent(req.params.zoneId)}`, undefined);
+    return res.status(status).json(body);
   } catch (err) {
     return res.status(503).json({ error: 'upstream_unavailable', message: err.message });
   }

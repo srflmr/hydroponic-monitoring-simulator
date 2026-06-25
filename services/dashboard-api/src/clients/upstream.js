@@ -33,6 +33,17 @@ async function fetchLogs(limit, offset) {
   return getJson(`${RESOURCE_ARBITRATION_URL}/logs?limit=${limit}&offset=${offset}`);
 }
 
+async function forwardZoneWrite(method, path, body) {
+  const res = await fetch(`${ZONE_CONFIG_URL}${path}`, {
+    method,
+    headers: body === undefined ? {} : { 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  let parsed = null;
+  try { parsed = await res.json(); } catch { parsed = null; }
+  return { status: res.status, body: parsed };
+}
+
 async function postSimulate(zoneId, param, value, durationSeconds) {
   const body = { param, value };
   if (durationSeconds !== undefined && durationSeconds !== null) {
@@ -55,4 +66,5 @@ module.exports = {
   fetchTank,
   fetchLogs,
   postSimulate,
+  forwardZoneWrite,
 };

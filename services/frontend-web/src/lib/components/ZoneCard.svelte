@@ -1,0 +1,74 @@
+<script>
+  import Ring from './Ring.svelte';
+  import StatusPill from './StatusPill.svelte';
+  import { metric, zoneStatus } from '$lib/data.js';
+
+  export let zone;
+  export let flow = false;            // currently drawing nutrient
+  export let queued = false;
+
+  $: ph = metric('ph', zone.ph, zone.th.phMin, zone.th.phMax);
+  $: ec = metric('ec', zone.ec, zone.th.ecMin, zone.th.ecMax);
+  $: temp = metric('temp', zone.temp, zone.th.tempMin, zone.th.tempMax);
+  $: level = metric('level', zone.level, 80, 100);
+  $: status = zoneStatus(zone);
+  $: flowLabel = flow ? 'Receiving nutrient' : queued ? 'Queued for nutrient' : 'Stable';
+</script>
+
+<a class="card" href="/zones/{zone.id}">
+  <div class="top">
+    <div class="title">
+      <span class="crop">{zone.crop}</span>
+      <span class="sub">{zone.name} · Priority {zone.priority}</span>
+    </div>
+    <StatusPill txt={status.txt} soft={status.soft} dot={status.dot} label={status.label} />
+  </div>
+
+  <div class="rings">
+    <Ring label="pH"   value={ph.value}   pct={ph.pct}   ring={ph.ring}   soft={ph.soft} />
+    <Ring label="EC"   value={ec.value}   pct={ec.pct}   ring={ec.ring}   soft={ec.soft} />
+    <Ring label="Temp" value={temp.value} pct={temp.pct} ring={temp.ring} soft={temp.soft} />
+  </div>
+
+  <div class="level">
+    <div class="level-head">
+      <span class="cap">Water level</span>
+      <span class="pct" style="color:{level.txt}">{level.value}%</span>
+    </div>
+    <div class="track"><div class="fill" style="width:{level.value}%; background:{level.ring}"></div></div>
+  </div>
+
+  <div class="foot">
+    <div class="flow">
+      <span class="fdot" style="background:{flow ? status.dot : '#C7BBA1'}; opacity:{flow ? 1 : 0.6}"></span>
+      <span class="flabel">{flowLabel}</span>
+    </div>
+    <span class="more">View detail →</span>
+  </div>
+</a>
+
+<style>
+  .card {
+    background: var(--surface); border: 1px solid var(--hair); border-radius: var(--radius);
+    padding: 22px; display: flex; flex-direction: column; gap: 18px;
+    text-decoration: none; color: inherit; cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 14px 34px -20px rgba(60,48,30,.4); }
+  .top { display: flex; align-items: flex-start; justify-content: space-between; }
+  .title { display: flex; flex-direction: column; gap: 3px; }
+  .crop { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+  .sub { font-size: 12px; color: var(--muted); }
+  .rings { display: flex; justify-content: space-between; padding: 4px 6px; }
+  .level { display: flex; flex-direction: column; gap: 8px; }
+  .level-head { display: flex; align-items: baseline; justify-content: space-between; }
+  .cap { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .pct { font-family: var(--mono); font-size: 14px; font-weight: 600; }
+  .track { position: relative; height: 10px; border-radius: 6px; background: var(--bg); overflow: hidden; }
+  .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; }
+  .foot { display: flex; align-items: center; justify-content: space-between; padding-top: 4px; border-top: 1px solid var(--hair-2); }
+  .flow { display: flex; align-items: center; gap: 8px; }
+  .fdot { width: 7px; height: 7px; border-radius: 50%; }
+  .flabel { font-size: 13px; color: var(--ink-3); font-weight: 500; }
+  .more { font-size: 13px; font-weight: 600; color: var(--nutrient); }
+</style>

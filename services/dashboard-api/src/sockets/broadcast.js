@@ -58,9 +58,16 @@ function broadcastArbitrationLog(log) {
   }
 }
 
+function broadcastAlert(alert) {
+  if (io) {
+    io.emit('alert', alert);
+  }
+}
+
 module.exports = {
   initSockets,
   broadcastZoneUpdate,
   broadcastTankUpdate,
   broadcastArbitrationLog,
+  broadcastAlert,
 };

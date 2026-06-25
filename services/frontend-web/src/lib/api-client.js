@@ -46,3 +46,23 @@ export async function postSimulate(zoneId, param, value, durationSeconds) {
   }
   return res.json();
 }
+
+export async function refillTank(amount) {
+  const res = await fetch(`${BASE}/api/tank/refill`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(amount === undefined ? {} : { amount }),
+  });
+  if (!res.ok) throw new Error(`refill ${res.status}`);
+  return res.json();
+}
+
+export async function updateZone(zoneId, fields) {
+  const res = await fetch(`${BASE}/api/zones/${zoneId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(fields),
+  });
+  const body = await res.json().catch(() => null);
+  return { ok: res.ok, status: res.status, body };
+}

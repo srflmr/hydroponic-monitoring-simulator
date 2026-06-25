@@ -2,11 +2,13 @@ import heapq
 import json
 import os
 import threading
+import uuid
 from datetime import datetime, timezone
 
 import paho.mqtt.client as mqtt
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
 from . import db, tank_manager
 from .arbitration import build_reason, plan_decisions
@@ -263,6 +265,54 @@ def tank_status():
 @app.get("/logs")
 def logs(limit: int = 50, offset: int = 0):
     return db.get_logs(limit, offset)
+
+
+class RefillBody(BaseModel):
+    amount: float | None = None
+
+
+class RequestBody(BaseModel):
+    zone_id: str
+    current_value: float
+    threshold_min: float
+    request_id: str | None = None
+    requested_at: str | None = None
+
+
+@app.post("/tank/refill")
+def tank_refill(body: RefillBody):
+    capacity = tank_manager.get_capacity()
+    current = tank_manager.get_current_volume()
+    target = capacity if body.amount is None else min(capacity, round(current + body.amount, 2))
+    tank_manager.set_volume(target)
+    with _arb_lock:
+        serve()  # reprocess queued requests in priority order
+    return tank_status()
+
+
+@app.post("/requests", status_code=202)
+def submit_request(body: RequestBody):
+    request = {
+        "request_id": body.request_id or f"req-{uuid.uuid4().hex[:8]}",
+        "zone_id": body.zone_id,
+        "param_violated": "ec",
+        "current_value": body.current_value,
+        "threshold_min": body.threshold_min,
+        "requested_at": body.requested_at or _iso(_now()),
+    }
+    intake([request])
+    return {"status": "accepted", "request_id": request["request_id"]}
+
+
+@app.get("/requests/pending")
+def pending_requests():
+    with _arb_lock:
+        items = [
+            {"request_id": rid, "zone_id": _requests[rid]["zone_id"], "score": _requests[rid]["score"]}
+            for _, _, rid in sorted(_heap)
+            if rid in _requests
+        ]
+    return {"pending": items, "total": len(items)}
 
 
 def start():

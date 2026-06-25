@@ -1,3 +1,4 @@
+import heapq
 import json
 import os
 import threading
@@ -8,11 +9,15 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
 from . import db, tank_manager
-from .arbitration import decide_allocation
+from .arbitration import build_reason, plan_decisions
+from .scoring import calculate_score, compute_criticality
+from .zone_config_client import get_zone_priority
 
 MQTT_BROKER_URL = os.environ["MQTT_BROKER_URL"]
 RESOURCE_QUEUE = "queue:resource_requests"
 ALLOCATION_VOLUME_LITER = float(os.environ.get("ALLOCATION_VOLUME_LITER", "5"))
+W1 = float(os.environ.get("ARBITRATION_W1", "0.4"))
+W2 = float(os.environ.get("ARBITRATION_W2", "0.6"))
 
 _connected = threading.Event()
 
@@ -63,40 +68,130 @@ def _publish_komando(zone_id, request_id, volume, decided_at):
     client.publish(topic, json.dumps(payload))
 
 
-def _process(request):
-    zone_id = request.get("zone_id")
-    request_id = request.get("request_id")
-    if zone_id is None or request_id is None:
-        return
+_arb_lock = threading.Lock()
+_heap = []          # (neg_score, seq, request_id)
+_requests = {}      # request_id -> {**request, "score": float}
+_queued_ids = set()  # request_ids already logged as queued
+_seq = 0
 
-    current_volume = tank_manager.get_current_volume()
-    result = decide_allocation(current_volume, ALLOCATION_VOLUME_LITER)
-    decided_at = _now()
-    raw_requested_at = request.get("requested_at")
-    requested_at = _parse_iso(raw_requested_at) if raw_requested_at else decided_at
 
-    if result["decision"] == "fulfilled":
-        tank_manager.set_volume(result["new_volume"])
-        tank_volume_after = result["new_volume"]
-    else:
-        tank_volume_after = None
-
-    db.insert_log(
-        {
-            "request_id": request_id,
-            "zone_id": zone_id,
-            "requested_at": requested_at,
-            "decision": result["decision"],
-            "reason": result["reason"],
-            "score": None,
-            "volume_requested": ALLOCATION_VOLUME_LITER,
-            "tank_volume_after": tank_volume_after,
-            "decided_at": decided_at,
-        }
+def _score_request(request: dict) -> float:
+    priority = get_zone_priority(request["zone_id"])
+    if priority is None:
+        priority = 0  # unknown zone -> lowest priority, still scored on criticality
+    criticality = compute_criticality(
+        float(request["current_value"]), float(request["threshold_min"])
     )
+    return calculate_score(priority, criticality, W1, W2)
 
-    if result["decision"] == "fulfilled":
-        _publish_komando(zone_id, request_id, ALLOCATION_VOLUME_LITER, decided_at)
+
+def _enqueue(request: dict, score: float) -> None:
+    global _seq
+    rid = request["request_id"]
+    _requests[rid] = {**request, "score": score}
+    heapq.heappush(_heap, (-score, _seq, rid))
+    _seq += 1
+
+
+def _drain_heap() -> list:
+    """Pop all heap entries into a score-ordered list of pending {request, score, already_queued}."""
+    pending = []
+    while _heap:
+        neg_score, _, rid = heapq.heappop(_heap)
+        req = _requests.get(rid)
+        if req is None:
+            continue
+        pending.append({"request": req, "score": req["score"], "already_queued": rid in _queued_ids})
+    return pending
+
+
+def _emit_event(log_entry: dict, alert: dict | None) -> None:
+    payload = {"log": log_entry, "alert": alert, "tank": _tank_snapshot()}
+    topic = f"hydroponic/{log_entry['zone_id']}/arbitrasi/event"
+    client.publish(topic, json.dumps(payload))
+
+
+def _tank_snapshot() -> dict:
+    current = tank_manager.get_current_volume()
+    capacity = tank_manager.get_capacity()
+    percentage = round(current / capacity * 100, 2) if capacity else 0.0
+    return {"current_volume": current, "capacity": capacity, "percentage": percentage}
+
+
+def _record(request: dict, decision: str, score, tank_volume_after, decided_at, top_zone=None):
+    requested_at = request.get("requested_at")
+    requested_dt = _parse_iso(requested_at) if requested_at else decided_at
+    reason = build_reason(
+        decision, score, request.get("current_value"), request.get("threshold_min"), top_zone
+    )
+    entry = {
+        "request_id": request["request_id"],
+        "zone_id": request["zone_id"],
+        "requested_at": requested_dt,
+        "decision": decision,
+        "reason": reason,
+        "score": score,
+        "volume_requested": ALLOCATION_VOLUME_LITER,
+        "tank_volume_after": tank_volume_after,
+        "decided_at": decided_at,
+    }
+    log_id = db.insert_log(entry)
+    log_entry = {
+        "id": log_id,
+        "zone_id": request["zone_id"],
+        "requested_at": _iso(requested_dt),
+        "decision": decision,
+        "reason": reason,
+        "tank_volume_after": tank_volume_after,
+    }
+    alert = None
+    if decision == "rejected":
+        alert = {"zone_id": request["zone_id"], "message": "Tangki perlu diisi ulang", "severity": "critical"}
+    elif decision == "queued":
+        alert = {"zone_id": request["zone_id"], "message": "Tangki perlu diisi ulang", "severity": "warning"}
+    _emit_event(log_entry, alert)
+
+
+def serve() -> None:
+    """Run a decision round over all pending requests. Caller holds _arb_lock."""
+    pending = _drain_heap()
+    if not pending:
+        return
+    volume = tank_manager.get_current_volume()
+    plan = plan_decisions(volume, ALLOCATION_VOLUME_LITER, pending)
+    top_zone = next(
+        (d["request"]["zone_id"] for d in plan["decisions"] if d["decision"] == "fulfilled"), None
+    )
+    for d in plan["decisions"]:
+        req = d["request"]
+        rid = req["request_id"]
+        decided_at = _now()
+        if d["decision"] == "fulfilled":
+            tank_manager.set_volume(d["tank_volume_after"])
+            _record(req, "fulfilled", d["score"], d["tank_volume_after"], decided_at)
+            _publish_komando(req["zone_id"], rid, ALLOCATION_VOLUME_LITER, decided_at)
+            _queued_ids.discard(rid)
+            _requests.pop(rid, None)
+        elif d["decision"] == "queued":
+            if rid not in _queued_ids:
+                _record(req, "queued", d["score"], None, decided_at, top_zone=top_zone)
+                _queued_ids.add(rid)
+            _enqueue(req, d["score"])  # keep it pending for the next round
+        else:  # rejected
+            _record(req, "rejected", d["score"], None, decided_at)
+            _queued_ids.discard(rid)
+            _requests.pop(rid, None)
+
+
+def intake(requests: list) -> None:
+    """Score a batch of incoming requests, enqueue them, and run a serve round."""
+    with _arb_lock:
+        for request in requests:
+            if request.get("zone_id") is None or request.get("request_id") is None:
+                continue
+            score = _score_request(request)
+            _enqueue(request, score)
+        serve()
 
 
 def _consume_loop():
@@ -104,16 +199,28 @@ def _consume_loop():
         item = tank_manager.brpop(RESOURCE_QUEUE, timeout=5)
         if item is None:
             continue
+        batch = []
         _, raw = item
         try:
-            request = json.loads(raw)
+            batch.append(json.loads(raw))
         except json.JSONDecodeError:
+            pass
+        # Non-blocking drain: batch any requests that arrived together so
+        # contention (and therefore `queued`) can occur.
+        while True:
+            nxt = tank_manager.r.rpop(RESOURCE_QUEUE)
+            if nxt is None:
+                break
+            try:
+                batch.append(json.loads(nxt))
+            except json.JSONDecodeError:
+                continue
+        if not batch:
             continue
         try:
-            _process(request)
+            intake(batch)
         except Exception as err:
-            print(f"resource-arbitration: failed to process request: {err}", flush=True)
-            continue
+            print(f"resource-arbitration: failed to process batch: {err}", flush=True)
 
 
 app = FastAPI()

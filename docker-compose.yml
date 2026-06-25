@@ -188,6 +188,9 @@ services:
       POSTGRES_URL: ${POSTGRES_URL}
       REDIS_URL: ${REDIS_URL}
       MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+      ZONE_CONFIG_URL: http://zone-config:3003
+      ARBITRATION_W1: "0.4"
+      ARBITRATION_W2: "0.6"
     networks:
       - internal
     depends_on:
@@ -196,6 +199,8 @@ services:
       redis:
         condition: service_healthy
       mosquitto:
+        condition: service_healthy
+      zone-config:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:3004/health')\""]

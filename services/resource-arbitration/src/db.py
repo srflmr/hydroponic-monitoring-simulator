@@ -29,9 +29,9 @@ def update_tank_volume(new_volume: float) -> None:
         )
 
 
-def insert_log(entry: dict) -> None:
+def insert_log(entry: dict) -> str:
     with pool.connection() as conn:
-        conn.execute(
+        row = conn.execute(
             """
             INSERT INTO arbitration_logs
                 (request_id, zone_id, requested_at, decision, reason,
@@ -39,9 +39,11 @@ def insert_log(entry: dict) -> None:
             VALUES (%(request_id)s, %(zone_id)s, %(requested_at)s, %(decision)s,
                     %(reason)s, %(score)s, %(volume_requested)s,
                     %(tank_volume_after)s, %(decided_at)s)
+            RETURNING id
             """,
             entry,
-        )
+        ).fetchone()
+    return str(row[0])
 
 
 def get_logs(limit: int, offset: int) -> dict:

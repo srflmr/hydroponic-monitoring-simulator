@@ -127,6 +127,7 @@ services:
       ZONE_ID: zone-a
       DEVICE_ID: sensor-01
       MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+      PUBLISH_INTERVAL_SECONDS: "${PUBLISH_INTERVAL_SECONDS:-4}"
     networks:
       - internal
     depends_on:
@@ -145,6 +146,7 @@ services:
       ZONE_ID: zone-b
       DEVICE_ID: sensor-01
       MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+      PUBLISH_INTERVAL_SECONDS: "${PUBLISH_INTERVAL_SECONDS:-4}"
       INIT_PH: "5.7"
       INIT_EC: "1.1"
       INIT_WATER_TEMP_C: "20.0"
@@ -166,6 +168,7 @@ services:
       ZONE_ID: zone-c
       DEVICE_ID: sensor-01
       MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+      PUBLISH_INTERVAL_SECONDS: "${PUBLISH_INTERVAL_SECONDS:-4}"
       INIT_PH: "6.0"
       INIT_EC: "1.6"
       INIT_WATER_TEMP_C: "23.0"
@@ -233,8 +236,9 @@ services:
       REDIS_URL: ${REDIS_URL}
       MQTT_BROKER_URL: ${MQTT_BROKER_URL}
       ZONE_CONFIG_URL: http://zone-config:3003
-      ARBITRATION_W1: "0.4"
-      ARBITRATION_W2: "0.6"
+      ARBITRATION_W1: "${ARBITRATION_W1:-0.4}"
+      ARBITRATION_W2: "${ARBITRATION_W2:-0.6}"
+      ALLOCATION_VOLUME_LITER: "${ALLOCATION_VOLUME_LITER:-5}"
     networks:
       - internal
     depends_on:
@@ -257,6 +261,7 @@ services:
     build: ./services/actuator-gateway
     environment:
       MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+      ACTUATOR_DELAY_SECONDS: "${ACTUATOR_DELAY_SECONDS:-1.5}"
     networks:
       - internal
     depends_on:

@@ -46,6 +46,13 @@ def _on_connect(c, userdata, flags, rc):
 client.on_connect = _on_connect
 
 
+def _on_disconnect(c, userdata, rc):
+    _connected.clear()
+
+
+client.on_disconnect = _on_disconnect
+
+
 def _now_iso():
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 

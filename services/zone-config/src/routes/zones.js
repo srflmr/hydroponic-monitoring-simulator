@@ -44,6 +44,9 @@ router.post('/zones', async (req, res) => {
     const zone = await createZone(req.body);
     return res.status(201).json(zone);
   } catch (err) {
+    if (err && err.code === '23505') {
+      return res.status(409).json({ error: 'zone_exists', message: 'zone_id sudah ada' });
+    }
     return res.status(503).json({ error: 'service_unavailable', message: 'Database tidak tersedia' });
   }
 });

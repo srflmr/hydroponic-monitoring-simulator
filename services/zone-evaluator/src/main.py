@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
 from .evaluator import evaluate_reading
-from .zone_config_client import get_thresholds
+from .zone_config_client import get_thresholds, ping as zone_config_ping
 
 REDIS_URL = os.environ["REDIS_URL"]
 TELEMETRY_QUEUE = "queue:telemetry_for_evaluation"
@@ -85,6 +85,8 @@ def health():
     try:
         r.ping()
     except Exception:
+        return JSONResponse(status_code=503, content={"status": "unavailable"})
+    if not zone_config_ping():
         return JSONResponse(status_code=503, content={"status": "unavailable"})
     return {"status": "ok"}
 

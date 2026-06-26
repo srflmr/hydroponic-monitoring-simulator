@@ -21,3 +21,12 @@ def get_thresholds(zone_id: str) -> dict | None:
         "temp_min": float(data["temp_min"]),
         "temp_max": float(data["temp_max"]),
     }
+
+
+def ping() -> bool:
+    """True if zone-config answers /health within the timeout."""
+    try:
+        with urllib.request.urlopen(f"{ZONE_CONFIG_URL}/health", timeout=2) as resp:
+            return resp.status == 200
+    except Exception:
+        return False

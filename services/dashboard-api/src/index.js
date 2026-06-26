@@ -6,6 +6,7 @@ const logsRouter = require('./routes/logs');
 const simulateRouter = require('./routes/simulate');
 const { initSockets } = require('./sockets/broadcast');
 const { startMqtt } = require('./mqtt-listener');
+const { pingInflux } = require('./clients/influx');
 
 const PORT = 3010;
 const app = express();
@@ -14,11 +15,16 @@ app.use(express.json());
 
 const mqttClient = startMqtt();
 
-app.get('/health', (req, res) => {
-  if (mqttClient.connected) {
-    return res.status(200).json({ status: 'ok' });
-  }
-  return res.status(503).json({ status: 'unavailable' });
+app.get('/health', async (req, res) => {
+  const checks = { mqtt: mqttClient.connected, influx: false, zoneConfig: false };
+  await Promise.all([
+    pingInflux().then(() => { checks.influx = true; }).catch(() => {}),
+    fetch(`${process.env.ZONE_CONFIG_URL}/health`, { signal: AbortSignal.timeout(2000) })
+      .then((r) => { checks.zoneConfig = r.ok; })
+      .catch(() => {}),
+  ]);
+  const ok = checks.mqtt && checks.influx && checks.zoneConfig;
+  return res.status(ok ? 200 : 503).json({ status: ok ? 'ok' : 'unavailable', checks });
 });
 
 app.use(zonesRouter);

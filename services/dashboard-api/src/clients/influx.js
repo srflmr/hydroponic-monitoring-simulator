@@ -25,4 +25,9 @@ async function queryHistory(zoneId, param, start, stop) {
   return points;
 }
 
-module.exports = { queryHistory };
+async function pingInflux() {
+  const res = await fetch(`${process.env.INFLUXDB_URL}/ping`, { signal: AbortSignal.timeout(2000) });
+  if (res.status !== 204 && !res.ok) throw new Error(`influx ping ${res.status}`);
+}
+
+module.exports = { queryHistory, pingInflux };

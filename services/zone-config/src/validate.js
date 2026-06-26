@@ -9,6 +9,8 @@ function validateZoneConfig(cfg) {
   const errors = [];
   if (typeof cfg.zone_id !== 'string' || cfg.zone_id.trim() === '') {
     errors.push('zone_id wajib berupa string tidak kosong');
+  } else if (!/^[a-z0-9][a-z0-9-]{0,31}$/.test(cfg.zone_id)) {
+    errors.push('zone_id hanya boleh berisi huruf kecil, angka, dan tanda hubung (maks 32 karakter)');
   }
   if (typeof cfg.name !== 'string' || cfg.name.trim() === '') {
     errors.push('name wajib berupa string tidak kosong');

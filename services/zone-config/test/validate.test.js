@@ -1,4 +1,5 @@
 const assert = require('node:assert');
+const { test } = require('node:test');
 const { validateZoneConfig } = require('../src/validate');
 
 const VALID = {
@@ -16,3 +17,22 @@ assert.ok(validateZoneConfig({ ...VALID, priority: 5.5 }).length > 0, 'non-integ
 assert.ok(validateZoneConfig({ ...VALID, ec_min: '1.5' }).length > 0, 'non-numeric threshold rejected');
 assert.ok(validateZoneConfig({ ...VALID, name: undefined }).length > 0, 'missing name rejected');
 console.log('validate.test.js: all assertions passed');
+
+test('validateZoneConfig rejects zone_id with disallowed characters', () => {
+  const cfg = {
+    zone_id: 'zone-a" |> yield', name: 'Zone A',
+    ph_min: 5.5, ph_max: 6.5, ec_min: 1.2, ec_max: 2.4,
+    temp_min: 18, temp_max: 26, priority: 5,
+  };
+  const errors = validateZoneConfig(cfg);
+  assert.ok(errors.some((e) => e.includes('zone_id hanya boleh')));
+});
+
+test('validateZoneConfig accepts a canonical zone_id', () => {
+  const cfg = {
+    zone_id: 'zone-a', name: 'Zone A',
+    ph_min: 5.5, ph_max: 6.5, ec_min: 1.2, ec_max: 2.4,
+    temp_min: 18, temp_max: 26, priority: 5,
+  };
+  assert.deepStrictEqual(validateZoneConfig(cfg), []);
+});

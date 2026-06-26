@@ -7,7 +7,8 @@ const queryApi = new InfluxDB({
 
 const BUCKET = process.env.INFLUXDB_BUCKET;
 
-// zoneId, param, start, and stop are caller-validated before reaching here, making interpolation safe.
+// zoneId is format-validated (isValidZoneIdFormat) and param checked against an
+// allowlist at the route; start/stop are ISO-8601 or a safe literal. Safe to interpolate.
 async function queryHistory(zoneId, param, start, stop) {
   const range = stop ? `range(start: ${start}, stop: ${stop})` : `range(start: ${start})`;
   const flux = `from(bucket: "${BUCKET}")

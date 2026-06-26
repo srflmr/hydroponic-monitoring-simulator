@@ -1,6 +1,7 @@
 const express = require('express');
 const { fetchZones, fetchZoneCurrent, forwardZoneWrite } = require('../clients/upstream');
 const { queryHistory } = require('../clients/influx');
+const { isValidZoneIdFormat } = require('../lib/validate');
 
 const router = express.Router();
 
@@ -45,6 +46,9 @@ router.get('/api/zones/:zoneId/history', async (req, res) => {
   }
   if (to !== undefined && !ISO_RE.test(to)) {
     return res.status(400).json({ error: 'invalid_to', message: 'to harus ISO-8601 UTC' });
+  }
+  if (!isValidZoneIdFormat(req.params.zoneId)) {
+    return res.status(400).json({ error: 'invalid_zone_id', message: 'zone_id tidak valid' });
   }
   try {
     const zones = await fetchZones();

@@ -40,6 +40,15 @@ http:
       priority: 50
       tls: {}
 
+    grafana:
+      rule: "Host(`grafana.hydroponic.localhost`)"
+      entryPoints:
+        - websecure
+      service: grafana
+      middlewares:
+        - authelia
+      tls: {}
+
   services:
     authelia:
       loadBalancer:
@@ -55,6 +64,11 @@ http:
       loadBalancer:
         servers:
           - url: "http://frontend-web:3000"
+
+    grafana:
+      loadBalancer:
+        servers:
+          - url: "http://grafana:3000"
 
   middlewares:
     authelia:

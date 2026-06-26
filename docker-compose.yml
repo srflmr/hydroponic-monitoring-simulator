@@ -44,6 +44,12 @@ services:
       AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET: ${AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET}
     networks:
       - proxy
+    healthcheck:
+      test: ["CMD", "/app/healthcheck.sh"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
   postgres:
     image: postgres:16.4-alpine
@@ -291,6 +297,8 @@ services:
       - proxy
     depends_on:
       zone-config:
+        condition: service_healthy
+      zone-evaluator:
         condition: service_healthy
       resource-arbitration:
         condition: service_healthy

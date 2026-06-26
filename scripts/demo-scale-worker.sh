@@ -9,5 +9,5 @@ echo "→ Scaling zone-evaluator to ${N} replicas…"
 docker compose up -d --scale zone-evaluator="${N}" zone-evaluator
 echo "→ Replicas:"
 docker compose ps zone-evaluator
-echo "✓ Open https://grafana.hydroponic.localhost → 'Infra Overview' → 'Per-container CPU' now shows ${N} zone-evaluator-N containers sharing the evaluation load."
+echo "✓ Open https://grafana.hydroponic.localhost → 'Infra Overview' → 'Per-container CPU' now shows ${N} zone-evaluator replicas sharing the evaluation load."
 echo "→ To scale back: docker compose up -d --scale zone-evaluator=1 zone-evaluator"

@@ -10,9 +10,9 @@ docker compose exec -T postgres psql -U postgres -d hydroponic -c "UPDATE tank_s
 docker compose exec -T redis redis-cli SET tank:current_volume "${LIMIT}" >/dev/null
 
 trigger() {  # zone, ec value
-  docker compose exec -T "sensor-simulator-$1" python -c "import json,urllib.request as u; r=u.Request('http://localhost:3006/simulate', data=json.dumps({'param':'ec','value':$2,'duration_seconds':20}).encode(), headers={'Content-Type':'application/json'}, method='POST'); print('$1 ->', u.urlopen(r).read().decode())"
+  docker compose exec -T "sensor-simulator-$1" python -c "import json,urllib.request as u; r=u.Request('http://localhost:3006/simulate', data=json.dumps({'param':'ec','value':$2,'duration_seconds':20}).encode(), headers={'Content-Type':'application/json'}, method='POST'); print('$1 ->', u.urlopen(r, timeout=5).read().decode())"
 }
-echo "→ Forcing EC low on all three zones simultaneously…"
+echo "→ Forcing EC low on all three zones in rapid succession…"
 trigger zone-a 1.1   # ec_min 1.5
 trigger zone-b 0.5   # ec_min 0.8
 trigger zone-c 1.0   # ec_min 1.2

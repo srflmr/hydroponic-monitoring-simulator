@@ -12,6 +12,7 @@ volumes:
   postgres-data:
   influxdb-data:
   authelia-data:
+  prometheus-data:
 
 services:
   traefik:
@@ -356,3 +357,26 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+
+  prometheus:
+    image: prom/prometheus:v3.0.1
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - monitoring
+      - proxy
+    depends_on:
+      node-exporter:
+        condition: service_healthy
+      cadvisor:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9090/-/healthy"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s

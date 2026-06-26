@@ -1,4 +1,3 @@
-// services/dashboard-api/src/clients/influx.js
 const { InfluxDB } = require('@influxdata/influxdb-client');
 
 const queryApi = new InfluxDB({
@@ -8,8 +7,7 @@ const queryApi = new InfluxDB({
 
 const BUCKET = process.env.INFLUXDB_BUCKET;
 
-// zoneId and param are caller-validated against allowlists; start/stop are
-// caller-validated ISO-8601 or a safe duration literal. Safe to interpolate.
+// zoneId, param, start, and stop are caller-validated before reaching here, making interpolation safe.
 async function queryHistory(zoneId, param, start, stop) {
   const range = stop ? `range(start: ${start}, stop: ${stop})` : `range(start: ${start})`;
   const flux = `from(bucket: "${BUCKET}")

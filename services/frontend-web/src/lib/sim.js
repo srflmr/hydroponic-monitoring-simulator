@@ -1,17 +1,12 @@
-// Live farm-store adapter.
-// Maps real backend data (SSR REST + Socket.io WS events) into the `farm`
-// writable store shape that all components read.
-//
-// Pure mapping helpers live in ./mappers.js (zero imports) so they can be
-// unit-tested under bare Node without Vite.
+// Live farm-store adapter: maps SSR REST data and Socket.io events into the
+// `farm` writable store consumed by all components.
 
 import { writable } from 'svelte/store';
 import { connectSocket } from '$lib/socket';
 import { fetchZones, refillTank as apiRefill, updateZone } from '$lib/api-client';
 import { splitName, mapZone, mapTank, mapLog } from './mappers.js';
 
-// Re-export pure helpers so callers that previously imported from sim.js still
-// work after the refactor; the canonical import is ./mappers.js.
+// Re-exported for backward-compat; canonical source is ./mappers.js.
 export { splitName, mapZone, mapTank, mapLog } from './mappers.js';
 export { STATUS_MAP } from './mappers.js';
 
@@ -77,7 +72,7 @@ export function connectStream() {
 
   socket.on('alert', () => farm.update((s) => ({ ...s, alert: true })));
 
-  // Clear stale "serving" flashes (>5 s) so the flow dot settles.
+  // Expire "serving" entries older than 5 s so the flow dot stops animating.
   const sweep = setInterval(() => farm.update((s) => {
     const now = Date.now();
     const serving = {};
@@ -98,12 +93,12 @@ export async function refillTank() {
   try {
     await apiRefill();
   } catch (_e) {
-    // tank:update WS event will reflect the actual volume; swallow the error.
+    // The tank:update WS event will carry the authoritative volume; ignore the REST error.
   }
 }
 
-// draft: { [zoneId]: { phMin, phMax, ecMin, ecMax, tempMin, tempMax, priority } }
-// Values are strings (from form inputs); coerce to numbers.
+// draft shape: { [zoneId]: { phMin, phMax, ecMin, ecMax, tempMin, tempMax, priority } }
+// All values are strings from form inputs; coerced to numbers before the PUT.
 export async function applyConfig(draft) {
   const num = (x) => { const n = parseFloat(x); return Number.isNaN(n) ? undefined : n; };
   const errors = [];
@@ -117,12 +112,12 @@ export async function applyConfig(draft) {
     const res = await updateZone(zoneId, fields);
     if (!res.ok) errors.push({ zoneId, status: res.status, body: res.body });
   }
-  // Refetch zones so the store reflects the saved config.
+  // Refetch so the store immediately reflects the saved config.
   try {
     const zones = await fetchZones();
     farm.update((s) => ({ ...s, zones: zones.map(mapZone) }));
   } catch (_e) {
-    // Keep current store state if refetch fails.
+    // Keep current store state on refetch failure.
   }
   return errors;
 }

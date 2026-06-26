@@ -1,5 +1,5 @@
 <script>
-  // Circular gauge. Geometry is derived from `size`, so it scales cleanly.
+  // Geometry derives from `size` so the gauge scales uniformly.
   export let value = '';
   export let label = '';
   export let pct = 0;                 // 0..1 fill

@@ -27,11 +27,7 @@ http:
       priority: 10
       tls: {}
 
-    # Public branded /login + the static assets it needs (client bundle, fonts,
-    # favicon). No authelia middleware so an unauthenticated visitor can load it;
-    # its "Sign in" link navigates to "/", which the gated `frontend` router
-    # bounces to the Authelia portal. Server-rendered pages and /socket.io stay
-    # gated — only public client assets are exposed here.
+    # Public login page and its static assets; no auth middleware so unauthenticated visitors can reach it. All other routes remain gated.
     frontend-login:
       rule: "Host(`hydroponic.localhost`) && (PathPrefix(`/login`) || PathPrefix(`/_app`) || PathPrefix(`/fonts`) || Path(`/favicon.png`))"
       entryPoints:

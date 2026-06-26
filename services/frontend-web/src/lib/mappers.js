@@ -1,5 +1,4 @@
 // Pure ESM mappers — zero imports so bare Node can load this for unit tests.
-// sim.js and components import from here; the test file also imports directly.
 
 export const STATUS_MAP = { normal: 'ok', warning: 'warn', critical: 'crit' };
 

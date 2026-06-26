@@ -1,9 +1,8 @@
 import { browser } from '$app/environment';
 
-// On the server (SSR / server load functions) we call dashboard-api directly
-// over the internal Docker network.  In the browser we use a relative path so
-// requests go through Traefik (same-origin) — $env/dynamic/private cannot be
-// imported in a module that is also bundled for the client.
+// Server-side: call dashboard-api directly over the internal Docker network.
+// Browser-side: use a relative path (same-origin via Traefik) — $env/dynamic/private
+// cannot be imported in a module bundled for the client.
 // eslint-disable-next-line no-undef
 const BASE = browser ? '' : (typeof process !== 'undefined' ? (process.env.DASHBOARD_API_INTERNAL_URL || 'http://dashboard-api:3010') : 'http://dashboard-api:3010');
 

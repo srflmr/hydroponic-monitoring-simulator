@@ -48,7 +48,3 @@ docker compose ps
 ## Project layout
 
 `services/` (per-service code) · `traefik/`, `authelia/`, `mosquitto/`, `postgres/init/`, `prometheus/`, `grafana/` (infra config) · `scripts/` (demo shortcuts) · one root `docker-compose.yml`.
-
-## Academic context
-
-Built for **IMT01504602 — Microservices Development**. The repository is a course assignment; per project convention the academic status is noted here in the README rather than in the project name.

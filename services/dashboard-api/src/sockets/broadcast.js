@@ -12,7 +12,7 @@ async function refreshValidZones() {
     const zones = await fetchZones();
     validZoneIds = zones.map((zone) => zone.zone_id);
   } catch (err) {
-    // Keep the previous list on a transient upstream failure.
+    // Retain stale list on transient upstream failure rather than clearing valid zones.
   }
 }
 

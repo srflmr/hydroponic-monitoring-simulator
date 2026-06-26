@@ -51,7 +51,7 @@ class ActuatorGateway:
         request_id = komando.get("request_id")
         if zone_id is None or request_id is None:
             return
-        time.sleep(SIMULATED_DELAY_SECONDS)  # simulate the pump working
+        time.sleep(SIMULATED_DELAY_SECONDS)
         status = {
             "zone_id": zone_id,
             "request_id": request_id,

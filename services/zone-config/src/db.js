@@ -34,7 +34,7 @@ async function createZone(cfg) {
 }
 
 async function updateZone(zoneId, cfg) {
-  // cfg is the merged full config; zone_id is immutable, so update the rest.
+  // zone_id is immutable; update all other columns from the merged config.
   const cols = ZONE_COLUMNS.filter((c) => c !== 'zone_id');
   const setClause = cols.map((c, i) => `${c} = $${i + 1}`).join(', ');
   const values = cols.map((c) => cfg[c]);

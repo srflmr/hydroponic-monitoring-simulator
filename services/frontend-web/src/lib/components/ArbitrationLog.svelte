@@ -14,7 +14,7 @@
 
   <div class="items" class:stack={variant === 'stack'}>
     {#each logs as l (l.id)}
-      {@const d = DECISION[l.decision]}
+      {@const d = DECISION[l.decision] ?? { txt: 'var(--muted)', soft: 'var(--hair-2)', dot: 'var(--muted)', label: l.decision ?? 'unknown', sym: '?' }}
       {#if variant === 'row'}
         <div class="row">
           <span class="time">{l.time}</span>

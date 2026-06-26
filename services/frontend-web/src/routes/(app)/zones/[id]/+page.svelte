@@ -12,32 +12,32 @@
 
   $: id = $page.params.id;
   $: zones = $farm.zones;
-  $: zone = zones.find((z) => z.id === id) || zones[0];
-  $: status = zoneStatus(zone);
+  $: zone = zones.find((z) => z.id === id);
+  $: status = zone ? zoneStatus(zone) : null;
 
-  $: rings = [
+  $: rings = zone ? [
     { ...metric('ph', zone.ph, zone.th.phMin, zone.th.phMax), label: 'pH' },
     { ...metric('ec', zone.ec, zone.th.ecMin, zone.th.ecMax), label: 'EC' },
     { ...metric('temp', zone.temp, zone.th.tempMin, zone.th.tempMax), label: 'Temp' },
     { ...metric('level', zone.level, 80, 100), label: 'Water' }
-  ];
+  ] : [];
 
   $: hist = data.history;
-  $: charts = [
+  $: charts = zone ? [
     { signal: 'ec', label: 'EC', series: hist.ec, lo: zone.th.ecMin, hi: zone.th.ecMax },
     { signal: 'ph', label: 'pH', series: hist.ph, lo: zone.th.phMin, hi: zone.th.phMax },
     { signal: 'temp', label: 'Water temp', series: hist.temp, lo: zone.th.tempMin, hi: zone.th.tempMax },
     { signal: 'level', label: 'Water level', series: hist.level, lo: 80, hi: 100 }
-  ];
+  ] : [];
 
-  $: thresholdRows = [
+  $: thresholdRows = zone ? [
     { label: 'pH', range: `${zone.th.phMin.toFixed(1)} – ${zone.th.phMax.toFixed(1)}` },
     { label: 'EC (mS/cm)', range: `${zone.th.ecMin.toFixed(1)} – ${zone.th.ecMax.toFixed(1)}` },
     { label: 'Water temp (°C)', range: `${zone.th.tempMin.toFixed(0)} – ${zone.th.tempMax.toFixed(0)}` },
     { label: 'Water level (%)', range: '80 – 100' }
-  ];
+  ] : [];
 
-  $: zoneLogs = $farm.logs.filter((l) => l.zone_id === zone.id).slice(0, 6);
+  $: zoneLogs = zone ? $farm.logs.filter((l) => l.zone_id === zone.id).slice(0, 6) : [];
 </script>
 
 <svelte:head><title>{zone ? zone.crop : 'Zone'} · HMS</title></svelte:head>
@@ -48,7 +48,7 @@
       <button class="ghost" on:click={() => goto('/')}>← Overview</button>
       <div class="tabs">
         {#each zones as z (z.id)}
-          <button class="tab" class:active={z.id === zone.id} on:click={() => goto('/zones/' + z.id)}>{z.crop}</button>
+          <button class="tab" class:active={z.id === zone?.id} on:click={() => goto('/zones/' + z.id)}>{z.crop}</button>
         {/each}
       </div>
     </div>
@@ -100,6 +100,8 @@
       </div>
     </div>
   </div>
+  {:else}
+  <div class="notfound">Zone "{id}" tidak ditemukan.</div>
   {/if}
 </section>
 
@@ -137,6 +139,8 @@
   .tlabel { font-size: 14px; color: var(--ink-2); font-weight: 500; }
   .trange { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--ink); }
   .empty { font-size: 13px; color: #B6A98E; padding: 8px 0; }
+
+  .notfound { padding: 28px; color: var(--muted); font-size: 15px; }
 
   /* Strip ArbitrationLog card chrome when embedded inside the panel. */
   .panel.grow :global(.log) { background: transparent; border: none; border-radius: 0; padding: 0; }

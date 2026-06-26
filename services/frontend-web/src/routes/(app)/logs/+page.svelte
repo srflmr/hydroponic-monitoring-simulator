@@ -4,7 +4,7 @@
   export let data;
   $: rows = data.logs.map(mapLog);
 </script>
-<svelte:head><title>Arbitration log · Kanopi</title></svelte:head>
+<svelte:head><title>Arbitration log · HMS</title></svelte:head>
 <section class="page">
   <div class="pagehead">
     <span class="h">Arbitration log</span>

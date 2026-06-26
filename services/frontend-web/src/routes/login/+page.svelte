@@ -1,14 +1,14 @@
-<svelte:head><title>Sign in · Kanopi</title></svelte:head>
+<svelte:head><title>Sign in · HMS</title></svelte:head>
 
 <div class="login">
   <aside class="brand">
     <div class="logo">
       <span class="mark"><span class="leaf"></span></span>
-      <span class="name">Kanopi</span>
+      <span class="name">HMS</span>
     </div>
     <div class="pitch">
-      <h1>Multi-zone hydroponic control, in one calm view.</h1>
-      <p>Live sensor telemetry, automatic nutrient arbitration across zones, and a shared tank that always knows who needs feeding first.</p>
+      <h1>Hydroponic Monitoring System Simulator</h1>
+      <p>Live sensor telemetry and automatic nutrient arbitration across zones, from one shared tank that always knows who to feed first.</p>
     </div>
     <div class="stats">
       <div class="stat"><span class="num">3</span><span class="lbl">growing zones</span></div>
@@ -21,13 +21,13 @@
     <div class="form">
       <div class="intro">
         <span class="h">Sign in</span>
-        <span class="s">Operator access to Greenhouse-01</span>
+        <span class="s">Operator access to the monitoring console</span>
       </div>
       <div class="note">
         <span class="ndot"></span>
-        <span>Protected by Authelia · forwardAuth via Traefik</span>
+        <span>You'll sign in on the secure Authelia portal</span>
       </div>
-      <a class="sign-in-btn" href="/">Sign in</a>
+      <a class="sign-in-btn" href="https://auth.hydroponic.localhost/">Sign in</a>
     </div>
   </main>
 </div>

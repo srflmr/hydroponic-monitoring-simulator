@@ -40,7 +40,7 @@
   $: zoneLogs = $farm.logs.filter((l) => l.zone_id === zone.id).slice(0, 6);
 </script>
 
-<svelte:head><title>{zone ? zone.crop : 'Zone'} · Kanopi</title></svelte:head>
+<svelte:head><title>{zone ? zone.crop : 'Zone'} · HMS</title></svelte:head>
 
 <section class="page">
   <div class="controls">
@@ -138,7 +138,7 @@
   .trange { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--ink); }
   .empty { font-size: 13px; color: #B6A98E; padding: 8px 0; }
 
-  /* Recent-decisions panel embeds ArbitrationLog; strip its own card chrome */
+  /* Strip ArbitrationLog card chrome when embedded inside the panel. */
   .panel.grow :global(.log) { background: transparent; border: none; border-radius: 0; padding: 0; }
 
   @media (max-width: 1180px) { .detail { grid-template-columns: 1fr; } }

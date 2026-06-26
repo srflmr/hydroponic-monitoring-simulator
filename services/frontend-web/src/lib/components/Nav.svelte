@@ -23,7 +23,7 @@
   <div class="left">
     <div class="brand">
       <span class="mark"><span class="leaf"></span></span>
-      <span class="name">Kanopi</span>
+      <span class="name">HMS</span>
     </div>
     <nav>
       <button class:active={isDash} on:click={() => navigate('/')}>Dashboard</button>
@@ -42,15 +42,15 @@
 
     <div class="profile">
       <button class="chip" class:open={menuOpen} on:click={toggleMenu}>
-        <span class="avatar">A</span>
-        <span class="who">Ammar</span>
+        <span class="avatar">O</span>
+        <span class="who">Operator</span>
         <span class="caret" style="transform:rotate({menuOpen ? 180 : 0}deg)">▼</span>
       </button>
       {#if menuOpen}
         <div class="menu">
           <div class="meta">
-            <span class="mname">Ammar</span>
-            <span class="memail">operator@kanopi.farm</span>
+            <span class="mname">Operator</span>
+            <span class="memail">operator@hydroponic.localhost</span>
           </div>
           <button class="signout" on:click={logout}>Sign out</button>
         </div>

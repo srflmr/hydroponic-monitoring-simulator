@@ -11,7 +11,7 @@
   $: tankPct = Math.round(($farm.tank.volume / $farm.tank.capacity) * 100);
 </script>
 
-<svelte:head><title>Live overview · Kanopi</title></svelte:head>
+<svelte:head><title>Live overview · HMS</title></svelte:head>
 
 <section class="page">
   <div class="pagehead">

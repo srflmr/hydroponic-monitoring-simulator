@@ -50,7 +50,7 @@
   }
 </script>
 
-<svelte:head><title>Configuration · Kanopi</title></svelte:head>
+<svelte:head><title>Configuration · HMS</title></svelte:head>
 
 <section class="page">
   <div class="pagehead">

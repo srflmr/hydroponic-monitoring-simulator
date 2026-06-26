@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime, timezone
 
 import paho.mqtt.client as mqtt
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
@@ -267,7 +267,7 @@ def tank_status():
 
 
 @app.get("/logs")
-def logs(limit: int = 50, offset: int = 0):
+def logs(limit: int = Query(default=50, ge=1, le=500), offset: int = Query(default=0, ge=0)):
     return db.get_logs(limit, offset)
 
 

@@ -58,7 +58,7 @@ services:
             disabled: false
             displayname: "$${AUTHELIA_OPERATOR_DISPLAYNAME}"
             password: "$${HASH}"
-            email: $${AUTHELIA_OPERATOR_EMAIL}
+            email: "$${AUTHELIA_OPERATOR_EMAIL}"
             groups:
               - operators
         EOF

@@ -1,0 +1,18 @@
+user sensor_simulator
+topic write hydroponic/+/sensor/reading
+
+user telemetry_ingestion
+topic read hydroponic/+/sensor/reading
+
+user resource_arbitration
+topic write hydroponic/+/aktuator/komando
+topic write hydroponic/+/arbitrasi/event
+
+user actuator_gateway
+topic read hydroponic/+/aktuator/komando
+topic write hydroponic/+/aktuator/status
+
+user dashboard_api
+topic read hydroponic/+/sensor/reading
+topic read hydroponic/+/arbitrasi/event
+topic read hydroponic/+/aktuator/status

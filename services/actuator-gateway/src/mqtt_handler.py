@@ -62,5 +62,6 @@ class ActuatorGateway:
 
     def start(self):
         host, port = _broker_host_port(MQTT_BROKER_URL)
+        self.client.username_pw_set(os.environ["MQTT_USERNAME"], os.environ["MQTT_PASSWORD"])
         self.client.connect(host, port, keepalive=60)
         self.client.loop_start()

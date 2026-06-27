@@ -78,6 +78,7 @@ def _current_reading():
 
 def _publish_loop():
     host, port = _broker_host_port(MQTT_BROKER_URL)
+    client.username_pw_set(os.environ["MQTT_USERNAME"], os.environ["MQTT_PASSWORD"])
     client.connect(host, port, keepalive=60)
     client.loop_start()
     topic = f"hydroponic/{ZONE_ID}/sensor/reading"

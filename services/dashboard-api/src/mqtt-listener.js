@@ -12,7 +12,10 @@ const ARBITRASI_EVENT_TOPIC = 'hydroponic/+/arbitrasi/event';
 const AKTUATOR_STATUS_TOPIC = 'hydroponic/+/aktuator/status';
 
 function startMqtt() {
-  const client = mqtt.connect(process.env.MQTT_BROKER_URL);
+  const client = mqtt.connect(process.env.MQTT_BROKER_URL, {
+    username: process.env.MQTT_USERNAME,
+    password: process.env.MQTT_PASSWORD,
+  });
 
   client.on('connect', () => {
     client.subscribe([SENSOR_TOPIC, ARBITRASI_EVENT_TOPIC, AKTUATOR_STATUS_TOPIC], (err) => {

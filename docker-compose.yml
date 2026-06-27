@@ -125,12 +125,32 @@ services:
 
   mosquitto:
     image: eclipse-mosquitto:2.0.20
+    environment:
+      SENSOR_SIMULATOR_MQTT_PASSWORD: ${SENSOR_SIMULATOR_MQTT_PASSWORD}
+      TELEMETRY_MQTT_PASSWORD: ${TELEMETRY_MQTT_PASSWORD}
+      ARBITRATION_MQTT_PASSWORD: ${ARBITRATION_MQTT_PASSWORD}
+      ACTUATOR_MQTT_PASSWORD: ${ACTUATOR_MQTT_PASSWORD}
+      DASHBOARD_MQTT_PASSWORD: ${DASHBOARD_MQTT_PASSWORD}
     volumes:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./mosquitto/acl:/mosquitto/config/acl:ro
+    entrypoint:
+      - sh
+      - -c
+      - |
+        P=/tmp/mosquitto-passwd
+        mosquitto_passwd -c -b $$P sensor_simulator "$$SENSOR_SIMULATOR_MQTT_PASSWORD"
+        mosquitto_passwd -b $$P telemetry_ingestion "$$TELEMETRY_MQTT_PASSWORD"
+        mosquitto_passwd -b $$P resource_arbitration "$$ARBITRATION_MQTT_PASSWORD"
+        mosquitto_passwd -b $$P actuator_gateway "$$ACTUATOR_MQTT_PASSWORD"
+        mosquitto_passwd -b $$P dashboard_api "$$DASHBOARD_MQTT_PASSWORD"
+        chown mosquitto:mosquitto $$P
+        chmod 600 $$P
+        exec /docker-entrypoint.sh mosquitto -c /mosquitto/config/mosquitto.conf
     networks:
       - internal
     healthcheck:
-      test: ["CMD-SHELL", "mosquitto_sub -t '$$SYS/#' -C 1 -i healthcheck -W 3 || exit 1"]
+      test: ["CMD-SHELL", "mosquitto_sub -u dashboard_api -P \"$$DASHBOARD_MQTT_PASSWORD\" -t '$$SYS/#' -C 1 -i healthcheck -W 3 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -157,6 +177,8 @@ services:
       ZONE_ID: zone-a
       DEVICE_ID: sensor-01
       MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+      MQTT_USERNAME: sensor_simulator
+      MQTT_PASSWORD: ${SENSOR_SIMULATOR_MQTT_PASSWORD}
       PUBLISH_INTERVAL_SECONDS: "${PUBLISH_INTERVAL_SECONDS:-4}"
     networks:
       - internal
@@ -176,6 +198,8 @@ services:
       ZONE_ID: zone-b
       DEVICE_ID: sensor-01
       MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+      MQTT_USERNAME: sensor_simulator
+      MQTT_PASSWORD: ${SENSOR_SIMULATOR_MQTT_PASSWORD}
       PUBLISH_INTERVAL_SECONDS: "${PUBLISH_INTERVAL_SECONDS:-4}"
       INIT_PH: "5.7"
       INIT_EC: "1.1"
@@ -198,6 +222,8 @@ services:
       ZONE_ID: zone-c
       DEVICE_ID: sensor-01
       MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+      MQTT_USERNAME: sensor_simulator
+      MQTT_PASSWORD: ${SENSOR_SIMULATOR_MQTT_PASSWORD}
       PUBLISH_INTERVAL_SECONDS: "${PUBLISH_INTERVAL_SECONDS:-4}"
       INIT_PH: "6.0"
       INIT_EC: "1.6"
@@ -218,6 +244,8 @@ services:
     build: ./services/telemetry-ingestion
     environment:
       MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+      MQTT_USERNAME: telemetry_ingestion
+      MQTT_PASSWORD: ${TELEMETRY_MQTT_PASSWORD}
       INFLUXDB_URL: ${INFLUXDB_URL}
       INFLUXDB_ORG: ${INFLUXDB_ORG}
       INFLUXDB_BUCKET: ${INFLUXDB_BUCKET}
@@ -276,6 +304,8 @@ services:
       POSTGRES_URL: postgresql://resource_arbitration_app:${RESOURCE_ARBITRATION_DB_PASSWORD}@postgres:5432/${POSTGRES_DB}
       REDIS_URL: redis://resource_arbitration:${REDIS_ARBITRATION_PASSWORD}@redis:6379
       MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+      MQTT_USERNAME: resource_arbitration
+      MQTT_PASSWORD: ${ARBITRATION_MQTT_PASSWORD}
       ZONE_CONFIG_URL: http://zone-config:3003
       ARBITRATION_W1: "${ARBITRATION_W1:-0.4}"
       ARBITRATION_W2: "${ARBITRATION_W2:-0.6}"
@@ -302,6 +332,8 @@ services:
     build: ./services/actuator-gateway
     environment:
       MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+      MQTT_USERNAME: actuator_gateway
+      MQTT_PASSWORD: ${ACTUATOR_MQTT_PASSWORD}
       ACTUATOR_DELAY_SECONDS: "${ACTUATOR_DELAY_SECONDS:-1.5}"
     networks:
       - internal
@@ -322,6 +354,8 @@ services:
       ZONE_EVALUATOR_URL: http://zone-evaluator:3002
       RESOURCE_ARBITRATION_URL: http://resource-arbitration:3004
       MQTT_BROKER_URL: ${MQTT_BROKER_URL}
+      MQTT_USERNAME: dashboard_api
+      MQTT_PASSWORD: ${DASHBOARD_MQTT_PASSWORD}
       CORS_ORIGIN: https://hydroponic.localhost
       INFLUXDB_URL: ${INFLUXDB_URL}
       INFLUXDB_ORG: ${INFLUXDB_ORG}

@@ -341,6 +341,7 @@ def start():
     db.init()
     tank_manager.init_from_postgres()
     host, port = _broker_host_port(MQTT_BROKER_URL)
+    client.username_pw_set(os.environ["MQTT_USERNAME"], os.environ["MQTT_PASSWORD"])
     client.connect(host, port, keepalive=60)
     client.loop_start()
     threading.Thread(target=_consume_loop, daemon=True).start()

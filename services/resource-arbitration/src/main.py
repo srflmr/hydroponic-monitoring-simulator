@@ -267,8 +267,9 @@ def health():
 
 @app.get("/tank/status")
 def tank_status():
-    current = tank_manager.get_current_volume()
-    capacity = tank_manager.get_capacity()
+    with _arb_lock:
+        current = tank_manager.get_current_volume()
+        capacity = tank_manager.get_capacity()
     percentage = round(current / capacity * 100, 2) if capacity else 0.0
     return {
         "current_volume": current,

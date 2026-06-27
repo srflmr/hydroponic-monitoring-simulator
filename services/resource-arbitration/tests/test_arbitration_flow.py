@@ -88,3 +88,12 @@ def test_get_tank_missing_seed_raises_clear_error(monkeypatch):
     monkeypatch.setattr(main.db.pool, "connection", lambda: _FakeConn())
     with pytest.raises(RuntimeError, match="tank_status"):
         main.db.get_tank()
+
+
+def test_tank_status_reads_consistent_snapshot(engine, monkeypatch):
+    monkeypatch.setattr(main.tank_manager, "get_capacity", lambda: 200.0)
+    engine["vol"]["v"] = 50.0
+    body = main.tank_status()
+    assert body["current_volume"] == 50.0
+    assert body["capacity"] == 200.0
+    assert body["percentage"] == 25.0

@@ -3,6 +3,7 @@
   import { goto } from '$app/navigation';
   import { farm } from '$lib/sim.js';
   import { metric, zoneStatus, RANGE } from '$lib/data.js';
+  import { postSimulate } from '$lib/api-client.js';
   import Ring from '$lib/components/Ring.svelte';
   import Chart from '$lib/components/Chart.svelte';
   import StatusPill from '$lib/components/StatusPill.svelte';
@@ -38,6 +39,20 @@
   ] : [];
 
   $: zoneLogs = zone ? $farm.logs.filter((l) => l.zone_id === zone.id).slice(0, 6) : [];
+
+  let simParam = 'ec';
+  let simValue = 0.5;
+  let simDuration = 30;
+  let simMsg = '';
+  async function triggerSim(zoneId) {
+    simMsg = '';
+    try {
+      await postSimulate(zoneId, simParam, Number(simValue), Number(simDuration));
+      simMsg = 'Simulation triggered';
+    } catch (e) {
+      simMsg = 'Could not trigger simulation';
+    }
+  }
 </script>
 
 <svelte:head><title>{zone ? zone.crop : 'Zone'} · HMS</title></svelte:head>
@@ -103,6 +118,24 @@
   {:else}
   <div class="notfound">Zone "{id}" tidak ditemukan.</div>
   {/if}
+
+  {#if zone}
+  <section class="simulate">
+    <h3>Trigger simulation</h3>
+    <div class="sim-form">
+      <select bind:value={simParam} aria-label="Parameter">
+        <option value="ph">ph</option>
+        <option value="ec">ec</option>
+        <option value="water_temp_c">water_temp_c</option>
+        <option value="water_level_pct">water_level_pct</option>
+      </select>
+      <input type="number" step="0.1" bind:value={simValue} aria-label="Value" />
+      <input type="number" bind:value={simDuration} aria-label="Duration (s)" />
+      <button on:click={() => triggerSim(id)}>Trigger</button>
+    </div>
+    {#if simMsg}<p class="sim-msg">{simMsg}</p>{/if}
+  </section>
+  {/if}
 </section>
 
 <style>
@@ -148,4 +181,12 @@
   @media (max-width: 1180px) { .detail { grid-template-columns: 1fr; } }
   @media (max-width: 900px)  { .zhead { flex-direction: column; align-items: flex-start; } }
   @media (max-width: 620px)  { .charts { grid-template-columns: 1fr; } }
+
+  .simulate { margin-top: 24px; }
+  .simulate h3 { font-size: 15px; font-weight: 700; margin: 0 0 12px; color: var(--ink); }
+  .sim-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .sim-form select, .sim-form input { padding: 8px 10px; border-radius: var(--radius-sm, 8px); border: 1px solid var(--line, #d8d2c0); font-family: var(--font, inherit); }
+  .sim-form input { width: 110px; }
+  .sim-form button { padding: 9px 16px; border: none; border-radius: var(--radius-sm, 8px); background: var(--nutrient, #4b8f3f); color: var(--header, #fff); font-weight: 700; cursor: pointer; }
+  .sim-msg { font-size: 13px; color: var(--ink-3, #6b6b6b); margin-top: 8px; }
 </style>

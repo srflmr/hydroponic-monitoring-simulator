@@ -11,6 +11,7 @@ networks:
 volumes:
   postgres-data:
   influxdb-data:
+  influx-tokens:
   authelia-data:
   prometheus-data:
   grafana-data:
@@ -96,6 +97,7 @@ services:
       DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUXDB_TOKEN}
     volumes:
       - influxdb-data:/var/lib/influxdb2
+      - influx-tokens:/influx-tokens
       - ./influxdb/init:/docker-entrypoint-initdb.d:ro
     networks:
       - internal
@@ -208,12 +210,14 @@ services:
     # file written by influxdb/init/10-scoped-tokens.sh during first boot.
     # The command sources the file (INFLUXDB_WRITE_TOKEN → INFLUXDB_TOKEN) then
     # starts the app so the InfluxDB client picks up the write-only scoped token.
+    # Only the dedicated influx-tokens volume (not the full influxdb-data volume)
+    # is mounted here — the container can see the token file but nothing else.
     command:
       - sh
       - -c
       - '. /run/influxdb-secrets/scoped-tokens.env && INFLUXDB_TOKEN=$$INFLUXDB_WRITE_TOKEN exec node src/index.js'
     volumes:
-      - influxdb-data:/run/influxdb-secrets:ro
+      - influx-tokens:/run/influxdb-secrets:ro
     networks:
       - internal
     depends_on:
@@ -310,12 +314,14 @@ services:
     # file written by influxdb/init/10-scoped-tokens.sh during first boot.
     # The command sources the file (INFLUXDB_READ_TOKEN → INFLUXDB_TOKEN) then
     # starts the app so the InfluxDB client picks up the read-only scoped token.
+    # Only the dedicated influx-tokens volume (not the full influxdb-data volume)
+    # is mounted here — the container can see the token file but nothing else.
     command:
       - sh
       - -c
       - '. /run/influxdb-secrets/scoped-tokens.env && INFLUXDB_TOKEN=$$INFLUXDB_READ_TOKEN exec node src/index.js'
     volumes:
-      - influxdb-data:/run/influxdb-secrets:ro
+      - influx-tokens:/run/influxdb-secrets:ro
     networks:
       - internal
       - proxy

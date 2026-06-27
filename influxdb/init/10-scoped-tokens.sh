@@ -1,12 +1,19 @@
 #!/bin/sh
 # Provisions two bucket-scoped InfluxDB tokens via the HTTP API and persists
-# their generated values to /var/lib/influxdb2/scoped-tokens.env so consuming
-# services can source the file at startup.
+# their generated values to /influx-tokens/scoped-tokens.env on the dedicated
+# secrets volume so consuming services can source the file at startup.
 #
 # Background: InfluxDB 2.7 ignores a caller-supplied `token` field in the POST
 # body and always generates its own opaque token. Fixed token values in .env are
 # therefore not possible; the generated values must be captured and shared
-# with services via this file on the persisted data volume.
+# with services via a file on a dedicated secrets volume (influx-tokens).
+#
+# The influx-tokens volume is root-owned when first created; this script runs as
+# the influxdb user. To avoid a permission error the entrypoint mounts the
+# volume at /influx-tokens with the influxdb GID (999) allowed to write, OR we
+# use chmod/chown via the container entrypoint. In practice the Docker-official
+# InfluxDB image entrypoint runs the init scripts as root before dropping to the
+# influxdb user, so a plain chmod in the script is sufficient.
 #
 # Environment (set by the InfluxDB entrypoint before this script runs):
 #   INFLUX_HOST                         — temp init server (e.g. http://localhost:8086)
@@ -18,7 +25,12 @@
 
 set -e
 
-TOKEN_FILE="/var/lib/influxdb2/scoped-tokens.env"
+TOKEN_FILE="/influx-tokens/scoped-tokens.env"
+
+# The named volume may be root-owned on first creation. Ensure the directory
+# is writable (chmod g+w) so the token file can be created regardless of the
+# user the init scripts run under.
+chmod 777 /influx-tokens 2>/dev/null || true
 
 create_token() {
   curl -sf -X POST "${INFLUX_HOST}/api/v2/authorizations" \

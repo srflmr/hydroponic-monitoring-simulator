@@ -2,7 +2,7 @@ const mqtt = require('mqtt');
 const { writeReading } = require('./influx-writer');
 const { forwardReading } = require('./redis-forwarder');
 
-const SENSOR_TOPIC = 'hydroponic/+/sensor/#';
+const SENSOR_TOPIC = 'hydroponic/+/sensor/reading';
 
 function startSubscriber() {
   const client = mqtt.connect(process.env.MQTT_BROKER_URL, {

@@ -13,6 +13,7 @@ topic read hydroponic/+/aktuator/komando
 topic write hydroponic/+/aktuator/status
 
 user dashboard_api
+topic read $SYS/#
 topic read hydroponic/+/sensor/reading
 topic read hydroponic/+/arbitrasi/event
 topic read hydroponic/+/aktuator/status

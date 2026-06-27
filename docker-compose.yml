@@ -54,6 +54,7 @@ services:
       - sh
       - -c
       - |
+        : "$${AUTHELIA_OPERATOR_PASSWORD:?operator password required}"
         HASH=$$(authelia crypto hash generate argon2 --password "$$AUTHELIA_OPERATOR_PASSWORD" | sed -n 's/^Digest: //p')
         cat > /tmp/users_database.yml <<EOF
         users:

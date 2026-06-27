@@ -60,7 +60,7 @@
 <section class="page">
   <div class="controls">
     <div class="left">
-      <button class="ghost" on:click={() => goto('/')}>← Overview</button>
+      <button class="ghost" on:click={() => goto('/dashboard')}>← Overview</button>
       <div class="tabs">
         {#each zones as z (z.id)}
           <button class="tab" class:active={z.id === zone?.id} on:click={() => goto('/zones/' + z.id)}>{z.crop}</button>
@@ -116,7 +116,7 @@
     </div>
   </div>
   {:else}
-  <div class="notfound">Zone "{id}" tidak ditemukan.</div>
+  <div class="notfound">Zone "{id}" not found.</div>
   {/if}
 
   {#if zone}

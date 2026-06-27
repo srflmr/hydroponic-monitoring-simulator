@@ -71,44 +71,47 @@ def _publish_komando(zone_id, request_id, volume, decided_at):
 
 
 _arb_lock = threading.Lock()
-_heap = []          # (neg_score, seq, request_id)
-_requests = {}      # request_id -> {**request, "score": float}
-_queued_ids = set()  # request_ids already logged as queued
+# Satu sumber kebenaran: satu permintaan aktif per zona.
+_pending = {}   # zone_id -> {"request": dict, "score": float, "seq": int, "logged": str | None}
 _seq = 0
 
 
 def _score_request(request: dict) -> float:
     priority = get_zone_priority(request["zone_id"])
     if priority is None:
-        priority = 0  # unknown zone -> lowest priority, still scored on criticality
+        priority = 0  # zona tak dikenal -> prioritas terendah, tetap diskor dari kekritisan
     criticality = compute_criticality(
         float(request["current_value"]), float(request["threshold_min"])
     )
     return calculate_score(priority, criticality, W1, W2)
 
 
-def _enqueue(request: dict, score: float) -> None:
+def _upsert(request: dict, score: float) -> None:
+    """Sisipkan/perbarui permintaan aktif zona (reading terbaru menang). seq & status
+    'logged' dipertahankan selama zona tetap pending."""
     global _seq
-    rid = request["request_id"]
-    if rid in _requests:
-        # Refresh score only; the existing heap entry already references this rid.
-        _requests[rid] = {**request, "score": score}
-        return
-    _requests[rid] = {**request, "score": score}
-    heapq.heappush(_heap, (-score, _seq, rid))
-    _seq += 1
+    zid = request["zone_id"]
+    p = _pending.get(zid)
+    if p is None:
+        _pending[zid] = {"request": request, "score": score, "seq": _seq, "logged": None}
+        _seq += 1
+    else:
+        p["request"] = request
+        p["score"] = score
 
 
-def _drain_heap() -> list:
-    """Pop all heap entries into a score-ordered list of pending {request, score, already_queued}."""
-    pending = []
-    while _heap:
-        neg_score, _, rid = heapq.heappop(_heap)
-        req = _requests.get(rid)
-        if req is None:
-            continue
-        pending.append({"request": req, "score": req["score"], "already_queued": rid in _queued_ids})
-    return pending
+def _ordered_pending() -> list:
+    """Bangun ordering prioritas (PRD §13) dari _pending via heapq, pop ter-urut skor."""
+    heap = [(-p["score"], p["seq"], zid) for zid, p in _pending.items()]
+    heapq.heapify(heap)
+    ordered = []
+    while heap:
+        _, _, zid = heapq.heappop(heap)
+        p = _pending[zid]
+        ordered.append(
+            {"request": p["request"], "score": p["score"], "already_queued": p["logged"] is not None}
+        )
+    return ordered
 
 
 def _emit_event(log_entry: dict, alert: dict | None) -> None:
@@ -159,8 +162,8 @@ def _record(request: dict, decision: str, score, tank_volume_after, decided_at, 
 
 
 def serve() -> None:
-    """Run a decision round over all pending requests. Caller holds _arb_lock."""
-    pending = _drain_heap()
+    """Jalankan satu round keputusan atas semua zona pending. Caller memegang _arb_lock."""
+    pending = _ordered_pending()
     if not pending:
         return
     volume = tank_manager.get_current_volume()
@@ -170,27 +173,22 @@ def serve() -> None:
     )
     for d in plan["decisions"]:
         req = d["request"]
-        rid = req["request_id"]
+        zid = req["zone_id"]
         decided_at = _now()
         if d["decision"] == "fulfilled":
             tank_manager.set_volume(d["tank_volume_after"])
             _record(req, "fulfilled", d["score"], d["tank_volume_after"], decided_at)
-            _publish_komando(req["zone_id"], rid, ALLOCATION_VOLUME_LITER, decided_at)
-            _queued_ids.discard(rid)
-            _requests.pop(rid, None)
-        elif d["decision"] == "queued":
-            if rid not in _queued_ids:
-                _record(req, "queued", d["score"], None, decided_at, top_zone=top_zone)
-                _queued_ids.add(rid)
-            _enqueue(req, d["score"])  # keep it pending for the next round
-        else:  # rejected
-            _record(req, "rejected", d["score"], None, decided_at)
-            _queued_ids.discard(rid)
-            _requests.pop(rid, None)
+            _publish_komando(zid, req["request_id"], ALLOCATION_VOLUME_LITER, decided_at)
+            _pending.pop(zid, None)
+        else:  # queued / rejected -> tetap pending, dilayani ulang round berikut (incl. saat refill)
+            p = _pending.get(zid)
+            if p is not None and p["logged"] is None:
+                _record(req, d["decision"], d["score"], None, decided_at, top_zone=top_zone)
+                p["logged"] = d["decision"]
 
 
 def intake(requests: list) -> None:
-    """Score a batch of incoming requests, enqueue them, and run a serve round."""
+    """Skor batch permintaan masuk, upsert per zona, lalu jalankan satu round serve."""
     with _arb_lock:
         for request in requests:
             rid = request.get("request_id")
@@ -205,7 +203,7 @@ def intake(requests: list) -> None:
                 print(f"resource-arbitration: skipping malformed request {rid!r} zone={zid!r}: invalid current_value/threshold_min", flush=True)
                 continue
             score = _score_request(request)
-            _enqueue(request, score)
+            _upsert(request, score)
         serve()
 
 
@@ -311,11 +309,14 @@ def submit_request(body: RequestBody):
 @app.get("/requests/pending")
 def pending_requests():
     with _arb_lock:
-        items = [
-            {"request_id": rid, "zone_id": _requests[rid]["zone_id"], "score": _requests[rid]["score"]}
-            for _, _, rid in sorted(_heap)
-            if rid in _requests
-        ]
+        items = sorted(
+            (
+                {"request_id": p["request"]["request_id"], "zone_id": zid, "score": p["score"]}
+                for zid, p in _pending.items()
+            ),
+            key=lambda x: x["score"],
+            reverse=True,
+        )
     return {"pending": items, "total": len(items)}
 
 
@@ -327,8 +328,6 @@ def start():
     client.loop_start()
     threading.Thread(target=_consume_loop, daemon=True).start()
 
-
-_pending = _requests  # alias exposed for tests
 
 if os.environ.get("ARBITRATION_AUTOSTART", "1") != "0":
     start()

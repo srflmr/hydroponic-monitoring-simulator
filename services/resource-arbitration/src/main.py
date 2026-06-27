@@ -72,7 +72,7 @@ def _publish_komando(zone_id, request_id, volume, decided_at):
 
 _arb_lock = threading.Lock()
 # Satu sumber kebenaran: satu permintaan aktif per zona.
-_pending = {}   # zone_id -> {"request": dict, "score": float, "seq": int, "logged": str | None}
+_pending = {}  # zone_id -> {"request": dict, "score": float, "seq": int, "logged": str | None}
 _seq = 0
 
 
@@ -88,7 +88,8 @@ def _score_request(request: dict) -> float:
 
 def _normalize_requested_at(request: dict) -> dict:
     """Pastikan requested_at bisa di-parse; jika tidak, pakai waktu sekarang.
-    Mencegah _parse_iso raise di tengah serve() dan membuat round non-atomik."""
+    Mencegah _parse_iso raise di tengah serve() dan membuat round non-atomik.
+    Nilai kosong/falsy juga diganti dengan waktu sekarang."""
     ra = request.get("requested_at")
     if ra:
         try:
@@ -195,6 +196,7 @@ def serve() -> None:
             _pending.pop(zid, None)
         else:  # queued / rejected -> tetap pending, dilayani ulang round berikut (incl. saat refill)
             p = _pending.get(zid)
+            # First unserved decision per episode wins the label; later transitions don't re-log.
             if p is not None and p["logged"] is None:
                 _record(req, d["decision"], d["score"], None, decided_at, top_zone=top_zone)
                 p["logged"] = d["decision"]

@@ -74,6 +74,14 @@ def test_invalid_requested_at_keeps_round_atomic(engine):
     # requested_at rusak tidak boleh meledak di tengah serve; request tetap diproses
     main.intake([_req("zone-a", "a1", ts="bukan-tanggal")])
     assert [r["decision"] for r in engine["records"]] == ["fulfilled"]
+    assert engine["records"][0]["requested_at"]
+    assert main._pending == {}
+
+
+def test_empty_requested_at_still_fulfilled(engine):
+    engine["vol"]["v"] = 200.0
+    main.intake([_req("zone-a", "a1", ts="")])
+    assert [r["decision"] for r in engine["records"]] == ["fulfilled"]
     assert main._pending == {}
 
 

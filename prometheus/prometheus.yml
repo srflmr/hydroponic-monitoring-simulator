@@ -15,6 +15,12 @@ scrape_configs:
     static_configs:
       - targets: ['cadvisor:8080']
 
+  # Per-container stats via the Docker Engine API (works on Docker Desktop /
+  # WSL2 where cAdvisor cannot enumerate containers). cAdvisor-compatible names.
+  - job_name: docker-stats
+    static_configs:
+      - targets: ['docker-stats-exporter:9338']
+
   - job_name: traefik
     static_configs:
       - targets: ['traefik:8082']

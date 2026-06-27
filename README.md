@@ -11,13 +11,14 @@ A multi-zone hydroponic monitoring platform that automates nutrient allocation f
 | Custom | telemetry-ingestion, zone-evaluator, zone-config, resource-arbitration, actuator-gateway, dashboard-api, frontend-web, sensor-simulator (×3 zones) |
 | Gateway | traefik, authelia |
 | Data | postgres, redis, influxdb, mosquitto |
-| Monitoring | node-exporter, cadvisor, prometheus, grafana |
+| Monitoring | node-exporter (host), cadvisor + docker-stats-exporter (containers), docker-socket-proxy, prometheus, grafana |
 
 ## Security
 
 - **Per-service least-privilege identity** — each service authenticates to each store with its own credential: Postgres roles, InfluxDB scoped read/write tokens, Redis ACL users, Mosquitto per-topic ACL. No shared superuser; Redis `default` and MQTT anonymous are off.
 - **Non-root containers** — every custom service image runs as a non-root user.
 - **Gateway-only exposure** — only Traefik is reachable from outside; backends sit on an `internal` network. Page and WebSocket routes are gated by Authelia (forward-auth); Grafana trusts Authelia's `Remote-User` (auth-proxy, anonymous off). Authelia stores sessions in Postgres; its operator user is rendered from `.env`.
+- **No raw Docker socket in containers** — per-container metrics come from the Docker Engine API via a read-only `docker-socket-proxy` (only `GET /containers` and `/version`; writes blocked), so no container holds the root-equivalent `docker.sock`.
 - **Secrets via `.env`** — no credentials are committed; `.env.example` is the template.
 
 ## Prerequisites
@@ -39,7 +40,7 @@ docker compose ps
 |---|---|---|
 | Dashboard | https://hydroponic.localhost | self-signed cert (accept the warning); public landing → log in via Authelia → gated `/dashboard` |
 | Auth portal | https://auth.hydroponic.localhost | operator credentials from `.env` (`AUTHELIA_OPERATOR_USERNAME` / `AUTHELIA_OPERATOR_PASSWORD`) |
-| Grafana | https://grafana.hydroponic.localhost | behind Authelia (auth-proxy, no separate login); **Infra Overview** dashboard |
+| Grafana | https://grafana.hydroponic.localhost | behind Authelia (auth-proxy, no separate login); **Monitoring** folder → *Overview*, *Host · Node Exporter Full*, *Containers* dashboards |
 
 ## Demo (PRD §11 scenarios)
 

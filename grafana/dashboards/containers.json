@@ -1,0 +1,379 @@
+{
+  "uid": "hydro-containers",
+  "title": "Containers",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "tags": [
+    "monitoring"
+  ],
+  "timezone": "browser",
+  "refresh": "30s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "container",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "query": {
+          "query": "label_values(container_last_seen{job=\"docker-stats\"}, name)",
+          "refId": "A"
+        },
+        "refresh": 2,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*",
+        "current": {
+          "text": "All",
+          "value": "$__all"
+        },
+        "sort": 1,
+        "label": "Container"
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "type": "dashboard"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "CPU (cores)",
+      "description": "CPU cores per container (rate of cumulative CPU seconds).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisLabel": "",
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "rate(container_cpu_usage_seconds_total{job=\"docker-stats\", name=~\"$container\"}[5m])",
+          "refId": "A",
+          "editorMode": "code",
+          "range": true,
+          "instant": false,
+          "legendFormat": "{{name}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Memory usage",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisLabel": "",
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "container_memory_usage_bytes{job=\"docker-stats\", name=~\"$container\"}",
+          "refId": "A",
+          "editorMode": "code",
+          "range": true,
+          "instant": false,
+          "legendFormat": "{{name}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Network receive",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 9,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisLabel": "",
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "rate(container_network_receive_bytes_total{job=\"docker-stats\", name=~\"$container\"}[5m])",
+          "refId": "A",
+          "editorMode": "code",
+          "range": true,
+          "instant": false,
+          "legendFormat": "{{name}}"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Network transmit",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 9,
+        "w": 12,
+        "h": 8
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisLabel": "",
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "color": {
+            "mode": "palette-classic"
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "rate(container_network_transmit_bytes_total{job=\"docker-stats\", name=~\"$container\"}[5m])",
+          "refId": "A",
+          "editorMode": "code",
+          "range": true,
+          "instant": false,
+          "legendFormat": "{{name}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "table",
+      "title": "Current usage (per container)",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 17,
+        "w": 24,
+        "h": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "filterable": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "showHeader": true,
+        "footer": {
+          "show": false
+        }
+      },
+      "transformations": [
+        {
+          "id": "merge"
+        }
+      ],
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "rate(container_cpu_usage_seconds_total{job=\"docker-stats\", name=~\"$container\"}[5m])",
+          "refId": "A",
+          "editorMode": "code",
+          "range": false,
+          "instant": true,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "container_memory_usage_bytes{job=\"docker-stats\", name=~\"$container\"}",
+          "refId": "B",
+          "editorMode": "code",
+          "range": false,
+          "instant": true,
+          "format": "table"
+        }
+      ]
+    }
+  ]
+}

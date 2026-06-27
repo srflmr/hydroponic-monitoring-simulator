@@ -467,10 +467,15 @@ services:
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.49.1
+    # cgroup v2: run in the host cgroup namespace so cAdvisor can see the
+    # /sys/fs/cgroup/docker/<id> container cgroups (otherwise it is rebased to
+    # its own private namespace and only reports nameless host cgroups).
+    cgroup: host
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
       - /sys:/sys:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
     networks:
@@ -484,6 +489,47 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+
+  # Read-only Docker API gateway. cAdvisor cannot enumerate containers on
+  # Docker Desktop / WSL2, so docker-stats-exporter reads per-container stats
+  # from the Docker Engine API — but THROUGH this proxy, which exposes only
+  # GET /containers and /version over TCP (POST disabled), so no container ever
+  # holds the root-equivalent docker.sock directly.
+  docker-socket-proxy:
+    image: ghcr.io/tecnativa/docker-socket-proxy:0.3.0
+    environment:
+      CONTAINERS: 1
+      VERSION: 1
+      POST: 0
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:2375/version"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Exposes per-container CPU/memory/network as Prometheus metrics, with
+  # cAdvisor-compatible metric names so the Containers dashboard is portable
+  # (this exporter on Docker Desktop, cAdvisor on a native Linux host).
+  docker-stats-exporter:
+    build: ./services/docker-stats-exporter
+    environment:
+      DOCKER_HOST: tcp://docker-socket-proxy:2375
+    networks:
+      - monitoring
+    depends_on:
+      docker-socket-proxy:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:9338/health')\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   prometheus:
     image: prom/prometheus:v3.0.1

@@ -3,12 +3,12 @@
   import ZoneCard from '$lib/components/ZoneCard.svelte';
   import TankGauge from '$lib/components/TankGauge.svelte';
   import ArbitrationLog from '$lib/components/ArbitrationLog.svelte';
+  import AlertBar from '$lib/components/AlertBar.svelte';
 
   $: zones = $farm.zones;
   $: serving = $farm.serving;
   $: servingCount = Object.keys(serving).length;
   $: logsTop = $farm.logs.slice(0, 6);
-  $: tankPct = Math.round(($farm.tank.volume / $farm.tank.capacity) * 100);
 </script>
 
 <svelte:head><title>Live overview · HMS</title></svelte:head>
@@ -19,13 +19,9 @@
       <span class="h">Live overview</span>
       <span class="s">All zones updating in real time · select a zone for detail</span>
     </div>
-    {#if tankPct < 20}
-      <div class="alert">
-        <span class="adot"></span>
-        <span>Tank low — refill required</span>
-      </div>
-    {/if}
   </div>
+
+  <AlertBar />
 
   <div class="zones">
     {#each zones as zone (zone.id)}
@@ -45,10 +41,6 @@
   .intro { display: flex; flex-direction: column; gap: 4px; }
   .intro .h { font-size: 24px; font-weight: 700; letter-spacing: -.01em; }
   .intro .s { font-size: 14px; color: var(--ink-3); }
-  .alert { display: flex; align-items: center; gap: 9px; padding: 9px 15px; border-radius: 12px; background: var(--crit-soft); }
-  .alert .adot { width: 8px; height: 8px; border-radius: 50%; background: var(--crit-ring); animation: livePulse 1.4s ease-in-out infinite; }
-  .alert span:last-child { font-size: 13px; font-weight: 600; color: var(--crit); }
-
   .zones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   .bottom { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 20px; }
 

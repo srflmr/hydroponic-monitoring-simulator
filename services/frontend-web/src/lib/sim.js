@@ -5,6 +5,7 @@ import { writable } from 'svelte/store';
 import { connectSocket } from '$lib/socket';
 import { fetchZones, refillTank as apiRefill, updateZone } from '$lib/api-client';
 import { splitName, mapZone, mapTank, mapLog } from './mappers.js';
+import { upsertAlert, clearAlertForZone } from './alerts.js';
 
 // Re-exported for backward-compat; canonical source is ./mappers.js.
 export { splitName, mapZone, mapTank, mapLog } from './mappers.js';
@@ -23,7 +24,8 @@ function initialState() {
     serving: {},
     queue: [],
     decisions: 0,
-    alert: false,
+    alerts: [],
+    actuated: {},
     now: nowStr(),
     history: {},
     logs: [],
@@ -67,10 +69,11 @@ export function connectStream() {
     } else if (l.decision === 'queued') {
       queue = [...queue, l.zone_id];
     }
-    return { ...s, logs: [log, ...s.logs].slice(0, 16), decisions: s.decisions + 1, serving, queue };
+    const alerts = l.decision === 'fulfilled' ? clearAlertForZone(s.alerts, l.zone_id) : s.alerts;
+    return { ...s, logs: [log, ...s.logs].slice(0, 16), decisions: s.decisions + 1, serving, queue, alerts };
   }));
 
-  socket.on('alert', () => farm.update((s) => ({ ...s, alert: true })));
+  socket.on('alert', (a) => farm.update((s) => ({ ...s, alerts: upsertAlert(s.alerts, a) })));
 
   // Expire "serving" entries older than 5 s so the flow dot stops animating.
   const sweep = setInterval(() => farm.update((s) => {
@@ -87,6 +90,10 @@ export function connectStream() {
     clearInterval(sweep);
     if (socket) { socket.close(); socket = null; }
   };
+}
+
+export function dismissAlert(zoneId) {
+  farm.update((s) => ({ ...s, alerts: clearAlertForZone(s.alerts, zoneId) }));
 }
 
 export async function refillTank() {

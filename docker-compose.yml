@@ -73,11 +73,27 @@ services:
 
   redis:
     image: redis:7.4-alpine
-    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    environment:
+      REDIS_TELEMETRY_PASSWORD: ${REDIS_TELEMETRY_PASSWORD}
+      REDIS_EVALUATOR_PASSWORD: ${REDIS_EVALUATOR_PASSWORD}
+      REDIS_ARBITRATION_PASSWORD: ${REDIS_ARBITRATION_PASSWORD}
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command:
+      - sh
+      - -c
+      - |
+        cat > /tmp/redis-users.acl <<EOF
+        user default off
+        user telemetry_ingestion on >$$REDIS_TELEMETRY_PASSWORD resetchannels ~queue:telemetry_for_evaluation +@connection +lpush
+        user zone_evaluator on >$$REDIS_EVALUATOR_PASSWORD resetchannels ~queue:telemetry_for_evaluation ~queue:resource_requests +@connection +brpop +lpush
+        user resource_arbitration on >$$REDIS_ARBITRATION_PASSWORD resetchannels ~queue:resource_requests ~tank:current_volume +@connection +brpop +get +set
+        EOF
+        exec redis-server /usr/local/etc/redis/redis.conf
     networks:
       - internal
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "redis-cli -u redis://resource_arbitration:$$REDIS_ARBITRATION_PASSWORD@localhost:6379 ping"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -205,7 +221,7 @@ services:
       INFLUXDB_URL: ${INFLUXDB_URL}
       INFLUXDB_ORG: ${INFLUXDB_ORG}
       INFLUXDB_BUCKET: ${INFLUXDB_BUCKET}
-      REDIS_URL: ${REDIS_URL}
+      REDIS_URL: redis://telemetry_ingestion:${REDIS_TELEMETRY_PASSWORD}@redis:6379
     # INFLUXDB_TOKEN is not set here — it is sourced from the scoped-tokens.env
     # file written by influxdb/init/10-scoped-tokens.sh during first boot.
     # The command sources the file (INFLUXDB_WRITE_TOKEN → INFLUXDB_TOKEN) then
@@ -237,7 +253,7 @@ services:
   zone-evaluator:
     build: ./services/zone-evaluator
     environment:
-      REDIS_URL: ${REDIS_URL}
+      REDIS_URL: redis://zone_evaluator:${REDIS_EVALUATOR_PASSWORD}@redis:6379
       ZONE_CONFIG_URL: http://zone-config:3003
     networks:
       - internal
@@ -258,7 +274,7 @@ services:
     build: ./services/resource-arbitration
     environment:
       POSTGRES_URL: postgresql://resource_arbitration_app:${RESOURCE_ARBITRATION_DB_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      REDIS_URL: ${REDIS_URL}
+      REDIS_URL: redis://resource_arbitration:${REDIS_ARBITRATION_PASSWORD}@redis:6379
       MQTT_BROKER_URL: ${MQTT_BROKER_URL}
       ZONE_CONFIG_URL: http://zone-config:3003
       ARBITRATION_W1: "${ARBITRATION_W1:-0.4}"

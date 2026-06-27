@@ -12,7 +12,7 @@ identity_validation:
 
 authentication_backend:
   file:
-    path: /config/users_database.yml
+    path: /tmp/users_database.yml
 
 access_control:
   default_policy: one_factor
@@ -29,8 +29,11 @@ session:
 
 storage:
   encryption_key: 'set-via-env'
-  local:
-    path: /data/db.sqlite3
+  postgres:
+    address: 'tcp://postgres:5432'
+    database: authelia
+    schema: public
+    username: authelia
 
 notifier:
   filesystem:

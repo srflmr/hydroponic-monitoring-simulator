@@ -61,6 +61,6 @@ echo "[10-scoped-tokens] persisting token values to ${TOKEN_FILE} ..."
 # Write as shell-sourceable env vars using printf so shell-special characters
 # in the token values cannot corrupt the file (unlike a heredoc).
 printf 'INFLUXDB_WRITE_TOKEN=%s\nINFLUXDB_READ_TOKEN=%s\n' "$WRITE_TOKEN" "$READ_TOKEN" > "$TOKEN_FILE"
-chmod 600 "${TOKEN_FILE}"
+chmod 644 "${TOKEN_FILE}"
 
 echo "[10-scoped-tokens] scoped tokens provisioned."

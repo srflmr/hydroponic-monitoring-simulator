@@ -22,6 +22,8 @@ def get_tank() -> dict:
         row = conn.execute(
             "SELECT current_volume, capacity FROM tank_status WHERE id = 1"
         ).fetchone()
+    if row is None:
+        raise RuntimeError("tank_status seed row (id=1) missing — seed the tank before startup")
     return {"current_volume": float(row[0]), "capacity": float(row[1])}
 
 

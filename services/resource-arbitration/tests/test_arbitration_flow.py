@@ -75,3 +75,16 @@ def test_invalid_requested_at_keeps_round_atomic(engine):
     main.intake([_req("zone-a", "a1", ts="bukan-tanggal")])
     assert [r["decision"] for r in engine["records"]] == ["fulfilled"]
     assert main._pending == {}
+
+
+def test_get_tank_missing_seed_raises_clear_error(monkeypatch):
+    class _FakeConn:
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def execute(self, *a, **k):
+            class _Cur:
+                def fetchone(self_inner): return None
+            return _Cur()
+    monkeypatch.setattr(main.db.pool, "connection", lambda: _FakeConn())
+    with pytest.raises(RuntimeError, match="tank_status"):
+        main.db.get_tank()

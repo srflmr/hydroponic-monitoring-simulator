@@ -13,6 +13,13 @@ A multi-zone hydroponic monitoring platform that automates nutrient allocation f
 | Data | postgres, redis, influxdb, mosquitto |
 | Monitoring | node-exporter, cadvisor, prometheus, grafana |
 
+## Security
+
+- **Per-service least-privilege identity** — each service authenticates to each store with its own credential: Postgres roles, InfluxDB scoped read/write tokens, Redis ACL users, Mosquitto per-topic ACL. No shared superuser; Redis `default` and MQTT anonymous are off.
+- **Non-root containers** — every custom service image runs as a non-root user.
+- **Gateway-only exposure** — only Traefik is reachable from outside; backends sit on an `internal` network. Page and WebSocket routes are gated by Authelia (forward-auth); Grafana trusts Authelia's `Remote-User` (auth-proxy, anonymous off). Authelia stores sessions in Postgres; its operator user is rendered from `.env`.
+- **Secrets via `.env`** — no credentials are committed; `.env.example` is the template.
+
 ## Prerequisites
 
 - Docker + Docker Compose.
@@ -21,7 +28,7 @@ A multi-zone hydroponic monitoring platform that automates nutrient allocation f
 ## Run
 
 ```bash
-cp .env.example .env          # fill in the secrets (Authelia secrets, Influx token, Grafana admin password)
+cp .env.example .env          # fill in the secrets (per-service DB/Redis/MQTT credentials, Authelia operator + secrets, Influx admin token, Grafana admin password)
 docker compose up -d --build  # ~20 services; wait until all are healthy
 docker compose ps
 ```
@@ -30,15 +37,15 @@ docker compose ps
 
 | What | URL | Notes |
 |---|---|---|
-| Dashboard | https://hydroponic.localhost | self-signed cert (accept the warning); login via Authelia |
-| Auth portal | https://auth.hydroponic.localhost | operator `operator` / `operator-demo-2026` |
-| Grafana | https://grafana.hydroponic.localhost | behind Authelia; **Infra Overview** dashboard |
+| Dashboard | https://hydroponic.localhost | self-signed cert (accept the warning); public landing → log in via Authelia → gated `/dashboard` |
+| Auth portal | https://auth.hydroponic.localhost | operator credentials from `.env` (`AUTHELIA_OPERATOR_USERNAME` / `AUTHELIA_OPERATOR_PASSWORD`) |
+| Grafana | https://grafana.hydroponic.localhost | behind Authelia (auth-proxy, no separate login); **Infra Overview** dashboard |
 
 ## Demo (PRD §11 scenarios)
 
 | # | Scenario | How |
 |---|---|---|
-| 1–2 | Auth gate / login | open the dashboard unauthenticated → redirected to Authelia → log in |
+| 1–2 | Auth gate / login | public landing at `/`; opening `/dashboard` unauthenticated → redirected to Authelia → log in |
 | 3 | Normal condition | all zones live on the dashboard; tank gauge full |
 | 4 | Single-zone low EC | `./scripts/demo-trigger-zone-a.sh` |
 | 5–7 | Multi-zone conflict + refill | `./scripts/demo-trigger-konflik.sh` (prints the refill command for #7) |

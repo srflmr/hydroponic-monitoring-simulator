@@ -6,6 +6,8 @@ os.environ.setdefault("POSTGRES_URL", "postgresql://t:t@localhost:5432/t")
 os.environ.setdefault("ZONE_CONFIG_URL", "http://localhost:3003")
 os.environ["ARBITRATION_AUTOSTART"] = "0"
 
+import pytest
+
 from src import main  # noqa: E402
 
 
@@ -14,9 +16,6 @@ def test_main_imports_without_autostart():
     assert hasattr(main, "serve")
     assert main._pending == {}
     assert not main._connected.is_set()
-
-
-import pytest
 
 
 def _req(zone, rid, current=1.0, thr=1.5, ts="2026-06-27T00:00:00Z"):
@@ -67,3 +66,4 @@ def test_queued_logged_once_per_episode(engine):
         main.intake([_req("zone-b", f"b{i}", current=0.5)])
     unserved = [r for r in engine["records"] if r["decision"] in ("queued", "rejected")]
     assert len(unserved) == 1  # hanya satu log untuk satu episode
+    assert engine["records"][0]["decision"] == "rejected"

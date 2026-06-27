@@ -320,6 +320,7 @@ def pending_requests():
 
 
 def start():
+    db.init()
     tank_manager.init_from_postgres()
     host, port = _broker_host_port(MQTT_BROKER_URL)
     client.connect(host, port, keepalive=60)
@@ -327,5 +328,7 @@ def start():
     threading.Thread(target=_consume_loop, daemon=True).start()
 
 
-if os.environ.get("MQTT_BROKER_URL"):
+_pending = _requests  # alias exposed for tests
+
+if os.environ.get("ARBITRATION_AUTOSTART", "1") != "0":
     start()

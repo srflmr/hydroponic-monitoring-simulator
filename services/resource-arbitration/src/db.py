@@ -5,7 +5,11 @@ from psycopg_pool import ConnectionPool
 POSTGRES_URL = os.environ["POSTGRES_URL"]
 
 pool = ConnectionPool(POSTGRES_URL, min_size=1, max_size=4, open=False)
-pool.open()
+
+
+def init() -> None:
+    """Buka connection pool. Dipanggil saat startup, bukan saat import (agar test bisa import db)."""
+    pool.open()
 
 
 def ping() -> None:

@@ -87,7 +87,7 @@ services:
           echo "user default off"
           echo "user telemetry_ingestion on >$$REDIS_TELEMETRY_PASSWORD resetchannels ~queue:telemetry_for_evaluation +@connection +lpush"
           echo "user zone_evaluator on >$$REDIS_EVALUATOR_PASSWORD resetchannels ~queue:telemetry_for_evaluation ~queue:resource_requests +@connection +brpop +lpush"
-          echo "user resource_arbitration on >$$REDIS_ARBITRATION_PASSWORD resetchannels ~queue:resource_requests ~tank:current_volume +@connection +brpop +get +set"
+          echo "user resource_arbitration on >$$REDIS_ARBITRATION_PASSWORD resetchannels ~queue:resource_requests ~tank:current_volume +@connection +brpop +rpop +get +set"
         } > /tmp/redis-users.acl
         exec redis-server /usr/local/etc/redis/redis.conf
     networks:

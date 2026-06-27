@@ -27,7 +27,7 @@
         <span class="ndot"></span>
         <span>You'll sign in on the secure Authelia portal</span>
       </div>
-      <a class="sign-in-btn" href="https://auth.hydroponic.localhost/">Sign in</a>
+      <a class="sign-in-btn" href="/dashboard" data-sveltekit-reload>Sign in</a>
     </div>
   </main>
 </div>

@@ -15,7 +15,7 @@
   }
 
   $: path = $page.url.pathname;
-  $: isDash = path === '/';
+  $: isDash = path === '/dashboard';
   $: isConfig = path.startsWith('/config');
 </script>
 
@@ -26,7 +26,7 @@
       <span class="name">HMS</span>
     </div>
     <nav>
-      <button class:active={isDash} on:click={() => navigate('/')}>Dashboard</button>
+      <button class:active={isDash} on:click={() => navigate('/dashboard')}>Dashboard</button>
       <button class:active={isConfig} on:click={() => navigate('/config')}>Configuration</button>
       <button class:active={path.startsWith('/zones')} on:click={() => navigate('/zones/zone-a')}>Zones</button>
       <button class:active={path.startsWith('/logs')} on:click={() => navigate('/logs')}>Logs</button>

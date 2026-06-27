@@ -27,9 +27,9 @@ http:
       priority: 10
       tls: {}
 
-    # Public login page and its static assets; no auth middleware so unauthenticated visitors can reach it. All other routes remain gated.
-    frontend-login:
-      rule: "Host(`hydroponic.localhost`) && (PathPrefix(`/login`) || PathPrefix(`/_app`) || PathPrefix(`/fonts`) || Path(`/favicon.png`))"
+    # Public landing page and its static assets; no auth middleware so unauthenticated visitors can reach it. All other routes remain gated.
+    frontend-public:
+      rule: "Host(`hydroponic.localhost`) && (Path(`/`) || PathPrefix(`/_app`) || PathPrefix(`/fonts`) || Path(`/favicon.png`))"
       entryPoints:
         - websecure
       service: frontend

@@ -75,14 +75,22 @@ export function connectStream() {
 
   socket.on('alert', (a) => farm.update((s) => ({ ...s, alerts: upsertAlert(s.alerts, a) })));
 
-  // Expire "serving" entries older than 5 s so the flow dot stops animating.
+  socket.on('actuator:status', (st) => farm.update((s) => (st && st.zone_id
+    ? { ...s, actuated: { ...s.actuated, [st.zone_id]: Date.now() } }
+    : s)));
+
+  // Expire "serving" and "actuated" entries older than 5 s.
   const sweep = setInterval(() => farm.update((s) => {
     const now = Date.now();
     const serving = {};
     for (const [id, t] of Object.entries(s.serving)) {
       if (now - t < 5000) serving[id] = t;
     }
-    return { ...s, serving };
+    const actuated = {};
+    for (const [id, t] of Object.entries(s.actuated)) {
+      if (now - t < 5000) actuated[id] = t;
+    }
+    return { ...s, serving, actuated };
   }), 1000);
 
   return () => {

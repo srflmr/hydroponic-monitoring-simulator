@@ -2,6 +2,7 @@
   import Ring from './Ring.svelte';
   import StatusPill from './StatusPill.svelte';
   import { metric, zoneStatus } from '$lib/data.js';
+  import { farm } from '$lib/sim.js';
 
   export let zone;
   export let flow = false;            // currently drawing nutrient
@@ -13,6 +14,7 @@
   $: level = metric('level', zone.level, 80, 100);
   $: status = zoneStatus(zone);
   $: flowLabel = flow ? 'Receiving nutrient' : queued ? 'Queued for nutrient' : 'Stable';
+  $: actuated = !!($farm.actuated && $farm.actuated[zone.id]);
 </script>
 
 <a class="card" href="/zones/{zone.id}">
@@ -43,7 +45,10 @@
       <span class="fdot" style="background:{flow ? status.dot : '#C7BBA1'}; opacity:{flow ? 1 : 0.6}"></span>
       <span class="flabel">{flowLabel}</span>
     </div>
-    <span class="more">View detail →</span>
+    <div class="foot-right">
+      {#if actuated}<span class="actuated" title="Valve actuated">✓ actuated</span>{/if}
+      <span class="more">View detail →</span>
+    </div>
   </div>
 </a>
 
@@ -71,4 +76,6 @@
   .fdot { width: 7px; height: 7px; border-radius: 50%; }
   .flabel { font-size: 13px; color: var(--ink-3); font-weight: 500; }
   .more { font-size: 13px; font-weight: 600; color: var(--nutrient); }
+  .foot-right { display: flex; align-items: center; gap: 10px; }
+  .actuated { font-size: 11px; font-weight: 700; color: var(--nutrient-strong, #2F7D32); font-family: var(--mono, monospace); }
 </style>

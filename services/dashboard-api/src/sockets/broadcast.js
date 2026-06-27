@@ -64,10 +64,17 @@ function broadcastAlert(alert) {
   }
 }
 
+function broadcastActuatorStatus(status) {
+  if (io) {
+    io.emit('actuator:status', status);
+  }
+}
+
 module.exports = {
   initSockets,
   broadcastZoneUpdate,
   broadcastTankUpdate,
   broadcastArbitrationLog,
   broadcastAlert,
+  broadcastActuatorStatus,
 };

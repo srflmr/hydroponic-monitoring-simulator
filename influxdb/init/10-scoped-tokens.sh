@@ -28,9 +28,9 @@ set -e
 TOKEN_FILE="/influx-tokens/scoped-tokens.env"
 
 # The named volume may be root-owned on first creation. Ensure the directory
-# is writable (chmod g+w) so the token file can be created regardless of the
-# user the init scripts run under.
-chmod 777 /influx-tokens 2>/dev/null || true
+# is writable so the token file can be created regardless of the user the init
+# scripts run under. 755 is sufficient: owner writes, others only read+execute.
+chmod 755 /influx-tokens 2>/dev/null || true
 
 create_token() {
   curl -sf -X POST "${INFLUX_HOST}/api/v2/authorizations" \
@@ -49,18 +49,18 @@ echo "[10-scoped-tokens] creating telemetry-ingestion write token ..."
 WRITE_RESP=$(create_token \
   "{\"orgID\":\"${DOCKER_INFLUXDB_INIT_ORG_ID}\",\"description\":\"telemetry-ingestion write\",\"permissions\":[{\"action\":\"write\",\"resource\":{\"type\":\"buckets\",\"id\":\"${DOCKER_INFLUXDB_INIT_BUCKET_ID}\",\"orgID\":\"${DOCKER_INFLUXDB_INIT_ORG_ID}\"}}]}")
 WRITE_TOKEN=$(printf '%s\n' "$WRITE_RESP" | extract_token)
+[ -n "$WRITE_TOKEN" ] || { echo "[10-scoped-tokens] ERROR: failed to extract write token"; exit 1; }
 
 echo "[10-scoped-tokens] creating dashboard-api read token ..."
 READ_RESP=$(create_token \
   "{\"orgID\":\"${DOCKER_INFLUXDB_INIT_ORG_ID}\",\"description\":\"dashboard-api read\",\"permissions\":[{\"action\":\"read\",\"resource\":{\"type\":\"buckets\",\"id\":\"${DOCKER_INFLUXDB_INIT_BUCKET_ID}\",\"orgID\":\"${DOCKER_INFLUXDB_INIT_ORG_ID}\"}}]}")
 READ_TOKEN=$(printf '%s\n' "$READ_RESP" | extract_token)
+[ -n "$READ_TOKEN" ]  || { echo "[10-scoped-tokens] ERROR: failed to extract read token";  exit 1; }
 
 echo "[10-scoped-tokens] persisting token values to ${TOKEN_FILE} ..."
-# Write as shell-sourceable env vars; the file is read by service entrypoints.
-cat > "${TOKEN_FILE}" <<EOF
-INFLUXDB_WRITE_TOKEN=${WRITE_TOKEN}
-INFLUXDB_READ_TOKEN=${READ_TOKEN}
-EOF
+# Write as shell-sourceable env vars using printf so shell-special characters
+# in the token values cannot corrupt the file (unlike a heredoc).
+printf 'INFLUXDB_WRITE_TOKEN=%s\nINFLUXDB_READ_TOKEN=%s\n' "$WRITE_TOKEN" "$READ_TOKEN" > "$TOKEN_FILE"
 chmod 600 "${TOKEN_FILE}"
 
 echo "[10-scoped-tokens] scoped tokens provisioned."

@@ -86,6 +86,19 @@ def _score_request(request: dict) -> float:
     return calculate_score(priority, criticality, W1, W2)
 
 
+def _normalize_requested_at(request: dict) -> dict:
+    """Pastikan requested_at bisa di-parse; jika tidak, pakai waktu sekarang.
+    Mencegah _parse_iso raise di tengah serve() dan membuat round non-atomik."""
+    ra = request.get("requested_at")
+    if ra:
+        try:
+            _parse_iso(ra)
+            return request
+        except (ValueError, TypeError):
+            pass
+    return {**request, "requested_at": _iso(_now())}
+
+
 def _upsert(request: dict, score: float) -> None:
     """Sisipkan/perbarui permintaan aktif zona (reading terbaru menang). seq & status
     'logged' dipertahankan selama zona tetap pending."""
@@ -202,6 +215,7 @@ def intake(requests: list) -> None:
             except (KeyError, TypeError, ValueError):
                 print(f"resource-arbitration: skipping malformed request {rid!r} zone={zid!r}: invalid current_value/threshold_min", flush=True)
                 continue
+            request = _normalize_requested_at(request)
             score = _score_request(request)
             _upsert(request, score)
         serve()

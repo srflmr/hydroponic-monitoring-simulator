@@ -67,3 +67,11 @@ def test_queued_logged_once_per_episode(engine):
     unserved = [r for r in engine["records"] if r["decision"] in ("queued", "rejected")]
     assert len(unserved) == 1  # hanya satu log untuk satu episode
     assert engine["records"][0]["decision"] == "rejected"
+
+
+def test_invalid_requested_at_keeps_round_atomic(engine):
+    engine["vol"]["v"] = 200.0
+    # requested_at rusak tidak boleh meledak di tengah serve; request tetap diproses
+    main.intake([_req("zone-a", "a1", ts="bukan-tanggal")])
+    assert [r["decision"] for r in engine["records"]] == ["fulfilled"]
+    assert main._pending == {}

@@ -90,9 +90,13 @@ services:
       DOCKER_INFLUXDB_INIT_ORG: ${INFLUXDB_ORG}
       DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUXDB_BUCKET}
       DOCKER_INFLUXDB_INIT_RETENTION: ${INFLUXDB_RETENTION}
+      # Admin token for init only. The init script (10-scoped-tokens.sh) creates
+      # two bucket-scoped tokens and writes them to scoped-tokens.env on the data
+      # volume. Application services source that file at startup.
       DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUXDB_TOKEN}
     volumes:
       - influxdb-data:/var/lib/influxdb2
+      - ./influxdb/init:/docker-entrypoint-initdb.d:ro
     networks:
       - internal
     healthcheck:
@@ -197,10 +201,19 @@ services:
     environment:
       MQTT_BROKER_URL: ${MQTT_BROKER_URL}
       INFLUXDB_URL: ${INFLUXDB_URL}
-      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
       INFLUXDB_ORG: ${INFLUXDB_ORG}
       INFLUXDB_BUCKET: ${INFLUXDB_BUCKET}
       REDIS_URL: ${REDIS_URL}
+    # INFLUXDB_TOKEN is not set here — it is sourced from the scoped-tokens.env
+    # file written by influxdb/init/10-scoped-tokens.sh during first boot.
+    # The command sources the file (INFLUXDB_WRITE_TOKEN → INFLUXDB_TOKEN) then
+    # starts the app so the InfluxDB client picks up the write-only scoped token.
+    command:
+      - sh
+      - -c
+      - '. /run/influxdb-secrets/scoped-tokens.env && INFLUXDB_TOKEN=$$INFLUXDB_WRITE_TOKEN exec node src/index.js'
+    volumes:
+      - influxdb-data:/run/influxdb-secrets:ro
     networks:
       - internal
     depends_on:
@@ -291,9 +304,18 @@ services:
       MQTT_BROKER_URL: ${MQTT_BROKER_URL}
       CORS_ORIGIN: https://hydroponic.localhost
       INFLUXDB_URL: ${INFLUXDB_URL}
-      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
       INFLUXDB_ORG: ${INFLUXDB_ORG}
       INFLUXDB_BUCKET: ${INFLUXDB_BUCKET}
+    # INFLUXDB_TOKEN is not set here — it is sourced from the scoped-tokens.env
+    # file written by influxdb/init/10-scoped-tokens.sh during first boot.
+    # The command sources the file (INFLUXDB_READ_TOKEN → INFLUXDB_TOKEN) then
+    # starts the app so the InfluxDB client picks up the read-only scoped token.
+    command:
+      - sh
+      - -c
+      - '. /run/influxdb-secrets/scoped-tokens.env && INFLUXDB_TOKEN=$$INFLUXDB_READ_TOKEN exec node src/index.js'
+    volumes:
+      - influxdb-data:/run/influxdb-secrets:ro
     networks:
       - internal
       - proxy

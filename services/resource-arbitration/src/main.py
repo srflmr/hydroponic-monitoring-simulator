@@ -193,6 +193,11 @@ def serve() -> None:
             tank_manager.set_volume(d["tank_volume_after"])
             _record(req, "fulfilled", d["score"], d["tank_volume_after"], decided_at)
             _publish_komando(zid, req["request_id"], ALLOCATION_VOLUME_LITER, decided_at)
+            print(
+                f"resource-arbitration: decision zone={zid} request={req['request_id']} "
+                f"decision=fulfilled score={d['score']:.3f} tank_after={d['tank_volume_after']}",
+                flush=True,
+            )
             _pending.pop(zid, None)
         else:  # queued / rejected -> tetap pending, dilayani ulang round berikut (incl. saat refill)
             p = _pending.get(zid)
@@ -200,6 +205,11 @@ def serve() -> None:
             if p is not None and p["logged"] is None:
                 _record(req, d["decision"], d["score"], None, decided_at, top_zone=top_zone)
                 p["logged"] = d["decision"]
+                print(
+                    f"resource-arbitration: decision zone={zid} request={req['request_id']} "
+                    f"decision={d['decision']} score={d['score']:.3f}",
+                    flush=True,
+                )
 
 
 def intake(requests: list) -> None:

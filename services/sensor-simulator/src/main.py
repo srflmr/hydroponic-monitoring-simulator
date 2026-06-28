@@ -82,10 +82,20 @@ def _publish_loop():
     client.connect(host, port, keepalive=60)
     client.loop_start()
     topic = f"hydroponic/{ZONE_ID}/sensor/reading"
+    print(
+        f"sensor-simulator: publishing zone={ZONE_ID} device={DEVICE_ID} "
+        f"interval={PUBLISH_INTERVAL_SECONDS}s topic={topic}",
+        flush=True,
+    )
+    published = 0
+    log_every = int(os.environ.get("SENSOR_LOG_EVERY", "25"))
     while True:
         reading = _current_reading()
         payload = {"zone_id": ZONE_ID, "device_id": DEVICE_ID, "timestamp": _now_iso(), **reading}
         client.publish(topic, json.dumps(payload))
+        published += 1
+        if log_every > 0 and published % log_every == 0:
+            print(f"sensor-simulator: published {published} readings zone={ZONE_ID} last={reading}", flush=True)
         time.sleep(PUBLISH_INTERVAL_SECONDS)
 
 

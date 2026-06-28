@@ -46,11 +46,20 @@ class ActuatorGateway:
         try:
             komando = json.loads(payload.decode())
         except (json.JSONDecodeError, UnicodeDecodeError):
+            print("actuator-gateway: dropped non-JSON komando payload", flush=True)
             return
         zone_id = komando.get("zone_id")
         request_id = komando.get("request_id")
         if zone_id is None or request_id is None:
+            print(f"actuator-gateway: dropped komando missing zone_id/request_id: {komando}", flush=True)
             return
+        action = komando.get("action")
+        volume = komando.get("volume_liter")
+        print(
+            f"actuator-gateway: received komando zone={zone_id} request={request_id} "
+            f"action={action} volume={volume}",
+            flush=True,
+        )
         time.sleep(SIMULATED_DELAY_SECONDS)
         status = {
             "zone_id": zone_id,
@@ -59,6 +68,10 @@ class ActuatorGateway:
             "executed_at": _iso_now(),
         }
         self.client.publish(f"hydroponic/{zone_id}/aktuator/status", json.dumps(status))
+        print(
+            f"actuator-gateway: published status zone={zone_id} request={request_id} status=completed",
+            flush=True,
+        )
 
     def start(self):
         host, port = _broker_host_port(MQTT_BROKER_URL)

@@ -179,7 +179,7 @@ services:
         cp /mosquitto/config/acl $$A
         chown mosquitto:mosquitto $$A
         chmod 0700 $$A
-        exec /docker-entrypoint.sh mosquitto -c /mosquitto/config/mosquitto.conf
+        exec mosquitto -c /mosquitto/config/mosquitto.conf
     networks:
       - internal
     healthcheck:

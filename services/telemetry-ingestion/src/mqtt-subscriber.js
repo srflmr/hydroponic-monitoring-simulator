@@ -16,6 +16,9 @@ function startSubscriber() {
     });
   });
 
+  let processed = 0;
+  const LOG_EVERY = Number(process.env.TELEMETRY_LOG_EVERY || 50);
+
   client.on('message', async (topic, message) => {
     let payload;
     try {
@@ -26,6 +29,10 @@ function startSubscriber() {
     try {
       writeReading(payload);
       await forwardReading(payload);
+      processed += 1;
+      if (LOG_EVERY > 0 && processed % LOG_EVERY === 0) {
+        console.log(`telemetry-ingestion: ingested ${processed} readings (last zone=${payload.zone_id})`);
+      }
     } catch (err) {
       console.error('Failed to process message:', err.message);
     }

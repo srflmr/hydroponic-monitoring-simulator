@@ -15,7 +15,12 @@ authentication_backend:
     path: /tmp/users_database.yml
 
 access_control:
-  default_policy: one_factor
+  default_policy: deny
+  rules:
+    - domain:
+        - 'hydroponic.localhost'
+        - 'grafana.hydroponic.localhost'
+      policy: one_factor
 
 session:
   secret: 'set-via-env'

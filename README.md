@@ -39,7 +39,7 @@ docker compose ps
 | What | URL | Notes |
 |---|---|---|
 | Dashboard | https://hydroponic.localhost | self-signed cert (accept the warning); public landing → log in via Authelia → gated `/dashboard` |
-| Auth portal | https://auth.hydroponic.localhost | operator credentials from `.env` (`AUTHELIA_OPERATOR_USERNAME` / `AUTHELIA_OPERATOR_PASSWORD`) |
+| Auth portal | https://auth.hydroponic.localhost | operator credentials from `.env` (`OPERATOR_USERNAME` / `OPERATOR_PASSWORD`) |
 | Grafana | https://grafana.hydroponic.localhost | behind Authelia (auth-proxy, no separate login); **Monitoring** folder → *Overview*, *Host · Node Exporter Full*, *Containers* dashboards |
 
 ## Demo (PRD §11 scenarios)

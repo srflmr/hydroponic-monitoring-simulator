@@ -58,6 +58,11 @@ def _process(reading):
     if ec is not None and ec < thresholds["ec_min"]:
         request = _make_request(reading, thresholds["ec_min"])
         r.lpush(RESOURCE_QUEUE, json.dumps(request))
+        print(
+            f"zone-evaluator: enqueued resource request zone={zone_id} "
+            f"ec={ec} ec_min={thresholds['ec_min']} request_id={request['request_id']}",
+            flush=True,
+        )
 
 
 def _consume_loop():

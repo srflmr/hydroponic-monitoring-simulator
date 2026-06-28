@@ -453,13 +453,14 @@ services:
     image: prom/node-exporter:v1.8.2
     command:
       - "--path.rootfs=/host"
+      - "--collector.filesystem.mount-points-exclude=^(/(dev|proc|sys|run/credentials/.+|var/lib/docker/.+|var/lib/kubelet/.+)($|/)|.*docker-desktop-bind-mounts.*)"
     volumes:
       - /:/host:ro
     networks:
       - monitoring
     pid: host
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:9100/metrics | head -1 || exit 1"]
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:9100/metrics || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 5

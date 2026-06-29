@@ -6,14 +6,20 @@ const VALID_ZONES_REFRESH_MS = 30000;
 
 let io = null;
 let validZoneIds = ['zone-a', 'zone-b', 'zone-c'];
+let zoneNames = {};
 
 async function refreshValidZones() {
   try {
     const zones = await fetchZones();
     validZoneIds = zones.map((zone) => zone.zone_id);
+    zoneNames = Object.fromEntries(zones.map((z) => [z.zone_id, z.name]));
   } catch (err) {
-    // Retain stale list on transient upstream failure rather than clearing valid zones.
+    // Retain stale lists on transient upstream failure.
   }
+}
+
+function zoneNameFor(zoneId) {
+  return zoneNames[zoneId];
 }
 
 function initSockets(httpServer) {
@@ -77,4 +83,5 @@ module.exports = {
   broadcastArbitrationLog,
   broadcastAlert,
   broadcastActuatorStatus,
+  zoneNameFor,
 };

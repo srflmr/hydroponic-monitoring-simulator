@@ -5,6 +5,7 @@ const {
   broadcastArbitrationLog,
   broadcastAlert,
   broadcastActuatorStatus,
+  zoneNameFor,
 } = require('./sockets/broadcast');
 
 const SENSOR_TOPIC = 'hydroponic/+/sensor/reading';
@@ -40,7 +41,10 @@ function startMqtt() {
           water_level_pct: payload.water_level_pct,
         });
       } else if (topic.endsWith('/arbitrasi/event')) {
-        if (payload.log) broadcastArbitrationLog(payload.log);
+        if (payload.log) {
+          const name = zoneNameFor(payload.log.zone_id);
+          broadcastArbitrationLog(name ? { ...payload.log, zone_name: name } : payload.log);
+        }
         if (payload.tank) broadcastTankUpdate(payload.tank);
         if (payload.alert) broadcastAlert(payload.alert);
       } else if (topic.endsWith('/aktuator/status')) {

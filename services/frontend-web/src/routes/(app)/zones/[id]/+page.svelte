@@ -110,7 +110,7 @@
         {#if zoneLogs.length === 0}
           <span class="empty">No arbitration events for this zone yet.</span>
         {:else}
-          <ArbitrationLog logs={zoneLogs} variant="stack" title="" />
+          <ArbitrationLog logs={zoneLogs} variant="stack" title="Recent decisions" />
         {/if}
       </div>
     </div>

@@ -81,9 +81,12 @@ export function connectStream() {
 
   socket.on('alert', (a) => farm.update((s) => ({ ...s, alerts: upsertAlert(s.alerts, a) })));
 
-  socket.on('actuator:status', (st) => farm.update((s) => (st && st.zone_id
-    ? { ...s, actuated: { ...s.actuated, [st.zone_id]: Date.now() } }
-    : s)));
+  socket.on('actuator:status', (st) => farm.update((s) => {
+    if (!st || !st.zone_id) return s;
+    const serving = { ...s.serving };
+    delete serving[st.zone_id];
+    return { ...s, serving, actuated: { ...s.actuated, [st.zone_id]: Date.now() } };
+  }));
 
   // Expire "serving" and "actuated" entries older than 5 s.
   const sweep = setInterval(() => farm.update((s) => {
@@ -110,11 +113,12 @@ export function dismissAlert(zoneId) {
   farm.update((s) => ({ ...s, alerts: clearAlertForZone(s.alerts, zoneId) }));
 }
 
-export async function refillTank() {
+export async function refillTank(amount) {
   try {
-    await apiRefill();
+    const tank = await apiRefill(amount);
+    if (tank) farm.update((s) => ({ ...s, tank: mapTank(tank) }));
   } catch (_e) {
-    // The tank:update WS event will carry the authoritative volume; ignore the REST error.
+    // A tank:update WS event may still follow; ignore the REST error.
   }
 }
 

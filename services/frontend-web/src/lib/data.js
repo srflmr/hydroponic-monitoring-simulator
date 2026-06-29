@@ -42,10 +42,19 @@ export function statusOf(key, v, lo, hi) {
   return v < lo + m || v > hi - m ? 'warn' : 'ok';
 }
 
+// EC drives full ok/warn/crit (it is the arbitrated/actionable signal).
+// pH/temp are advisory: in-range -> ok, out-of-range -> warn (never crit).
+// level uses fixed display thresholds.
+export function metricStatus(key, v, lo, hi) {
+  if (key === 'level') return v >= 80 ? 'ok' : v >= 60 ? 'warn' : 'crit';
+  if (key === 'ec') return statusOf('ec', v, lo, hi);
+  return (v < lo || v > hi) ? 'warn' : 'ok';
+}
+
 // Returns a view-model for one reading: formatted value, colours, and gauge fill fraction.
 export function metric(key, v, lo, hi) {
   const r = RANGE[key];
-  const statusKey = statusOf(key, v, lo, hi);
+  const statusKey = metricStatus(key, v, lo, hi);
   const c = COLORS[statusKey];
   const pct = clamp((v - r.dmin) / (r.dmax - r.dmin), 0, 1);
   return {
@@ -57,14 +66,8 @@ export function metric(key, v, lo, hi) {
   };
 }
 
-// Derives zone status from ph/ec/temp only; water level is display-only and never affects zone status.
+// Zone status is EC-only — the indicator the system actually acts on.
 export function zoneStatus(zone) {
-  const order = { ok: 0, warn: 1, crit: 2 };
-  const keys = [
-    metric('ph', zone.ph, zone.th.phMin, zone.th.phMax),
-    metric('ec', zone.ec, zone.th.ecMin, zone.th.ecMax),
-    metric('temp', zone.temp, zone.th.tempMin, zone.th.tempMax)
-  ];
-  const worst = keys.reduce((a, m) => (order[m.statusKey] > order[a.statusKey] ? m : a));
-  return { key: worst.statusKey, ...COLORS[worst.statusKey] };
+  const m = metric('ec', zone.ec, zone.th.ecMin, zone.th.ecMax);
+  return { key: m.statusKey, ...COLORS[m.statusKey] };
 }

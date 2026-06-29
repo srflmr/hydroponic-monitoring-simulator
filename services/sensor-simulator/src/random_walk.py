@@ -14,10 +14,21 @@ PARAM_STEP = {
     "water_level_pct": 1.0,
 }
 
+REVERSION_FRAC = 0.15  # fraction pulled toward setpoint each step (mean reversion)
 
-def next_value(param: str, current: float) -> float:
-    """Return the next random-walk value for a parameter, clamped to its bounds."""
+
+def revert(value: float, setpoint: float, frac: float = REVERSION_FRAC) -> float:
+    """Pull `value` a fraction of the way toward `setpoint` (mean reversion)."""
+    return value + (setpoint - value) * frac
+
+
+def next_value(param: str, current: float, setpoint: float | None = None, bias: float = 0.0) -> float:
+    """Next random-walk value. Optional `setpoint` adds mean reversion (keeps a
+    param naturally near a baseline); `bias` adds a constant drift (e.g. EC
+    consumption). Always clamped to PARAM_BOUNDS."""
     low, high = PARAM_BOUNDS[param]
     step = PARAM_STEP[param]
-    candidate = current + random.uniform(-step, step)
+    candidate = current + random.uniform(-step, step) + bias
+    if setpoint is not None:
+        candidate = revert(candidate, setpoint)
     return max(low, min(high, candidate))

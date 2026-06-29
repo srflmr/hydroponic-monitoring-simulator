@@ -167,6 +167,7 @@ services:
       - sh
       - -c
       - |
+        rm -f /tmp/mosquitto-passwd /tmp/mosquitto-acl
         P=/tmp/mosquitto-passwd
         mosquitto_passwd -c -b $$P sensor_simulator "$$SENSOR_SIMULATOR_MQTT_PASSWORD"
         mosquitto_passwd -b $$P telemetry_ingestion "$$TELEMETRY_MQTT_PASSWORD"

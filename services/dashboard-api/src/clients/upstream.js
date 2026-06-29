@@ -59,6 +59,14 @@ async function forwardTankRefill(body) {
   return { status: res.status, body: parsed };
 }
 
+async function forwardTankSet(body) {
+  const res = await fetch(`${RESOURCE_ARBITRATION_URL}/tank/set`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}),
+  });
+  let parsed = null; try { parsed = await res.json(); } catch { parsed = null; }
+  return { status: res.status, body: parsed };
+}
+
 async function postSimulate(zoneId, param, value, durationSeconds) {
   const body = { param, value };
   if (durationSeconds !== undefined && durationSeconds !== null) {
@@ -84,4 +92,5 @@ module.exports = {
   postSimulate,
   forwardZoneWrite,
   forwardTankRefill,
+  forwardTankSet,
 };

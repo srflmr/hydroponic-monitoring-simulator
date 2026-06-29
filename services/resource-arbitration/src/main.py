@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 from . import db, tank_manager
 from .arbitration import build_reason, plan_decisions
 from .scoring import calculate_score, compute_criticality
+from .tank_utils import clamp_volume
 from .zone_config_client import get_zone_priority
 
 MQTT_BROKER_URL = os.environ["MQTT_BROKER_URL"]
@@ -165,6 +166,7 @@ def _record(request: dict, decision: str, score, tank_volume_after, decided_at, 
         "requested_at": _iso(requested_dt),
         "decision": decision,
         "reason": reason,
+        "score": score,
         "tank_volume_after": tank_volume_after,
     }
     alert = None
@@ -314,6 +316,19 @@ def tank_refill(body: RefillBody):
         capacity = tank_manager.get_capacity()
         current = tank_manager.get_current_volume()
         target = max(0.0, capacity if body.amount is None else min(capacity, round(current + body.amount, 2)))
+        tank_manager.set_volume(target)
+        serve()
+    return tank_status()
+
+
+class SetVolumeBody(BaseModel):
+    volume: float = Field(ge=0)
+
+
+@app.post("/tank/set")
+def tank_set(body: SetVolumeBody):
+    with _arb_lock:
+        target = clamp_volume(body.volume, tank_manager.get_capacity())
         tank_manager.set_volume(target)
         serve()
     return tank_status()

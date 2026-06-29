@@ -76,3 +76,11 @@ export async function updateZone(zoneId, fields) {
   const body = await res.json().catch(() => null);
   return { ok: res.ok, status: res.status, body };
 }
+
+export async function setTankVolume(volume) {
+  const res = await fetch(`${BASE}/api/tank/set`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ volume }),
+  });
+  if (!res.ok) throw new Error(`tank/set ${res.status}`);
+  return res.json();
+}

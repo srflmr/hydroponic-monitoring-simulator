@@ -15,6 +15,13 @@ ZONE_ID = os.environ["ZONE_ID"]
 DEVICE_ID = os.environ.get("DEVICE_ID", "sensor-01")
 MQTT_BROKER_URL = os.environ["MQTT_BROKER_URL"]
 PUBLISH_INTERVAL_SECONDS = float(os.environ.get("PUBLISH_INTERVAL_SECONDS", "4"))
+EC_CONSUMPTION_BIAS = float(os.environ.get("EC_CONSUMPTION_BIAS", "-0.03"))
+EC_RECOVERY_DELTA = float(os.environ.get("EC_RECOVERY_DELTA", "0.6"))
+# pH/temp mean-revert toward their configured baseline so they stay realistic.
+_SETPOINTS = {
+    "ph": float(os.environ.get("INIT_PH", "6.0")),
+    "water_temp_c": float(os.environ.get("INIT_WATER_TEMP_C", "25.0")),
+}
 
 PARAMS = ["ph", "ec", "water_temp_c", "water_level_pct"]
 
@@ -41,9 +48,26 @@ client = mqtt.Client(client_id=f"sensor-simulator-{ZONE_ID}")
 def _on_connect(c, userdata, flags, rc):
     if rc == 0:
         _connected.set()
+        c.subscribe(f"hydroponic/{ZONE_ID}/aktuator/status")
 
 
 client.on_connect = _on_connect
+
+
+def _on_message(c, userdata, msg):
+    try:
+        status = json.loads(msg.payload.decode())
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return
+    if status.get("status") != "completed":
+        return
+    low, high = PARAM_BOUNDS["ec"]
+    with _lock:
+        _state["ec"] = max(low, min(high, _state["ec"] + EC_RECOVERY_DELTA))
+    print(f"sensor-simulator: EC recovered zone={ZONE_ID} ec={round(_state['ec'], 2)} (+{EC_RECOVERY_DELTA})", flush=True)
+
+
+client.on_message = _on_message
 
 
 def _on_disconnect(c, userdata, rc):
@@ -70,7 +94,12 @@ def _current_reading():
             else:
                 if override:
                     del _overrides[param]  # expired
-                value = next_value(param, _state[param])
+                value = next_value(
+                    param,
+                    _state[param],
+                    setpoint=_SETPOINTS.get(param),
+                    bias=EC_CONSUMPTION_BIAS if param == "ec" else 0.0,
+                )
                 _state[param] = value
             reading[param] = round(value, 2)
         return reading

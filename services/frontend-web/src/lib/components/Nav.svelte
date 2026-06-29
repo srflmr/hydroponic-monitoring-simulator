@@ -11,7 +11,7 @@
     goto(path);
   }
   function logout() {
-    window.location.href = 'https://auth.hydroponic.localhost/logout';
+    window.location.href = 'https://auth.hydroponic.localhost/logout?rd=https://hydroponic.localhost/';
   }
 
   $: path = $page.url.pathname;

@@ -119,7 +119,7 @@
 {/if}
 
 <style>
-  .page { padding: 30px clamp(16px, 4vw, 32px) 40px; display: flex; flex-direction: column; gap: 22px; }
+  .page { width: 100%; min-width: 0; max-width: 1400px; margin-inline: auto; padding: 30px clamp(16px, 4vw, 32px) 40px; display: flex; flex-direction: column; gap: 22px; }
   .pagehead { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
   .intro { display: flex; flex-direction: column; gap: 4px; }
   .intro .h { font-size: 24px; font-weight: 700; letter-spacing: -.01em; }
@@ -130,7 +130,7 @@
   .save { border: none; cursor: pointer; padding: 11px 20px; border-radius: 12px; background: var(--nutrient); color: var(--header); font-family: var(--font); font-size: 14px; font-weight: 700; box-shadow: inset 0 -3px 0 rgba(0,0,0,.1); }
   .save:hover { background: var(--nutrient-strong); }
 
-  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .grid { width: 100%; min-width: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   .card { background: var(--surface); border: 1px solid var(--hair); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; gap: 20px; }
   .top { display: flex; align-items: flex-start; justify-content: space-between; }
   .title { display: flex; flex-direction: column; gap: 3px; }

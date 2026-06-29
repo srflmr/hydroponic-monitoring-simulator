@@ -42,7 +42,7 @@
 </section>
 
 <style>
-  .page { padding: 30px clamp(16px, 4vw, 32px) 40px; display: flex; flex-direction: column; gap: 22px; }
+  .page { width: 100%; max-width: var(--page-max); margin-inline: auto; padding: 30px clamp(16px, 4vw, 32px) 40px; display: flex; flex-direction: column; gap: 22px; }
   .pagehead { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
   .intro { display: flex; flex-direction: column; gap: 4px; }
   .intro .h { font-size: 24px; font-weight: 700; letter-spacing: -.01em; }

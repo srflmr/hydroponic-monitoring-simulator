@@ -43,6 +43,15 @@
   --warn:    #AD8530;  --warn-ring: #D8B45A;  --warn-soft: #F0E4C2;
   --crit:    #AF5739;  --crit-ring: #CB7B5F;  --crit-soft: #F2D8CD;
   --accent-soft: #E2ECCF;
+
+  /* spacing scale (4-pt) */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px;
+  /* type scale */
+  --text-2xs: 11px; --text-xs: 12px; --text-sm: 13px; --text-base: 14px;
+  --text-md: 16px;  --text-lg: 20px; --text-xl: 24px; --text-2xl: 32px; --text-display: 42px;
+  /* layout */
+  --page-max: 1400px;
 }
 
 * { box-sizing: border-box; }

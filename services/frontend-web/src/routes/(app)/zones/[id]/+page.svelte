@@ -166,7 +166,7 @@
 </section>
 
 <style>
-  .page { padding: 24px clamp(16px, 4vw, 32px) 40px; display: flex; flex-direction: column; gap: 22px; }
+  .page { width: 100%; max-width: var(--page-max); margin-inline: auto; padding: 24px clamp(16px, 4vw, 32px) 40px; display: flex; flex-direction: column; gap: 22px; }
 
   .controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
   .left { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }

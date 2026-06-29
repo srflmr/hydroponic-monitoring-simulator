@@ -2,7 +2,7 @@
   "uid": "hydro-containers",
   "title": "Containers",
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
   "editable": true,
   "tags": [
     "monitoring"
@@ -55,6 +55,64 @@
   },
   "panels": [
     {
+      "id": 6,
+      "type": "stat",
+      "title": "Containers running",
+      "description": "Count of containers currently reporting to docker-stats.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          },
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "count(container_last_seen{job=\"docker-stats\"})",
+          "refId": "A",
+          "editorMode": "code",
+          "range": false,
+          "instant": true,
+          "legendFormat": "Running"
+        }
+      ]
+    },
+    {
       "id": 1,
       "type": "timeseries",
       "title": "CPU (cores)",
@@ -65,7 +123,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 0,
+        "y": 4,
         "w": 12,
         "h": 9
       },
@@ -110,7 +168,73 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(container_cpu_usage_seconds_total{job=\"docker-stats\", name=~\"$container\"}[5m])",
+          "expr": "rate(container_cpu_usage_seconds_total{job=\"docker-stats\",name=~\"$container\"}[5m])",
+          "refId": "A",
+          "editorMode": "code",
+          "range": true,
+          "instant": false,
+          "legendFormat": "{{name}}"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "CPU (%)",
+      "description": "CPU utilisation per container as % of all cores (assumes 8 CPU cores).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 12,
+        "h": 9
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 1,
+            "fillOpacity": 10,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisLabel": "",
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "rate(container_cpu_usage_seconds_total{job=\"docker-stats\",name=~\"$container\"}[5m]) / 8 * 100",
           "refId": "A",
           "editorMode": "code",
           "range": true,
@@ -129,8 +253,8 @@
         "uid": "prometheus"
       },
       "gridPos": {
-        "x": 12,
-        "y": 0,
+        "x": 0,
+        "y": 13,
         "w": 12,
         "h": 9
       },
@@ -175,7 +299,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "container_memory_usage_bytes{job=\"docker-stats\", name=~\"$container\"}",
+          "expr": "container_memory_usage_bytes{job=\"docker-stats\",name=~\"$container\"}",
           "refId": "A",
           "editorMode": "code",
           "range": true,
@@ -195,7 +319,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 9,
+        "y": 22,
         "w": 12,
         "h": 8
       },
@@ -240,7 +364,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(container_network_receive_bytes_total{job=\"docker-stats\", name=~\"$container\"}[5m])",
+          "expr": "rate(container_network_receive_bytes_total{job=\"docker-stats\",name=~\"$container\"}[5m])",
           "refId": "A",
           "editorMode": "code",
           "range": true,
@@ -260,7 +384,7 @@
       },
       "gridPos": {
         "x": 12,
-        "y": 9,
+        "y": 22,
         "w": 12,
         "h": 8
       },
@@ -305,7 +429,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(container_network_transmit_bytes_total{job=\"docker-stats\", name=~\"$container\"}[5m])",
+          "expr": "rate(container_network_transmit_bytes_total{job=\"docker-stats\",name=~\"$container\"}[5m])",
           "refId": "A",
           "editorMode": "code",
           "range": true,
@@ -324,7 +448,7 @@
       },
       "gridPos": {
         "x": 0,
-        "y": 17,
+        "y": 30,
         "w": 24,
         "h": 10
       },
@@ -354,7 +478,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(container_cpu_usage_seconds_total{job=\"docker-stats\", name=~\"$container\"}[5m])",
+          "expr": "rate(container_cpu_usage_seconds_total{job=\"docker-stats\",name=~\"$container\"}[5m])",
           "refId": "A",
           "editorMode": "code",
           "range": false,
@@ -366,7 +490,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "container_memory_usage_bytes{job=\"docker-stats\", name=~\"$container\"}",
+          "expr": "container_memory_usage_bytes{job=\"docker-stats\",name=~\"$container\"}",
           "refId": "B",
           "editorMode": "code",
           "range": false,

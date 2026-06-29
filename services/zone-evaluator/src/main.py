@@ -53,6 +53,7 @@ def _process(reading):
             },
             "status": result["status"],
             "violated_params": result["violated_params"],
+            "indicators": result["indicators"],
             "evaluated_at": _now_iso(),
         }
     ec = reading.get("ec")

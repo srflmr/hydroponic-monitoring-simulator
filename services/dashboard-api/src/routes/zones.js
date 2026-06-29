@@ -23,6 +23,7 @@ router.get('/api/zones', async (req, res) => {
           ...zone,
           status: current ? current.status : null,
           violated_params: current ? current.violated_params : [],
+          indicators: current ? current.indicators : {},
           last_reading: current ? current.last_reading : null,
         };
       }),

@@ -6,17 +6,8 @@ def violation_edge(ec, ec_min, was_in_violation: bool):
     now = ec is not None and ec < float(ec_min)
     return (now and not was_in_violation), now
 
-# reading key -> (min threshold key, max threshold key)
-_PARAM_KEYS = {
-    "ph": ("ph_min", "ph_max"),
-    "ec": ("ec_min", "ec_max"),
-    "water_temp_c": ("temp_min", "temp_max"),
-}
 
-_RANK = {"normal": 0, "warning": 1, "critical": 2}
-
-
-def _param_status(value, lo: float, hi: float) -> str:
+def _ec_status(value, lo: float, hi: float) -> str:
     if value is None:
         return "normal"
     if value < lo or value > hi:
@@ -27,18 +18,24 @@ def _param_status(value, lo: float, hi: float) -> str:
     return "normal"
 
 
+def _range_indicator(value, lo: float, hi: float) -> str:
+    if value is None:
+        return "in_range"
+    return "out_of_range" if (value < lo or value > hi) else "in_range"
+
+
 def evaluate_reading(reading: dict, thresholds: dict) -> dict:
-    """Per-parameter status (normal/warning/critical) for the three ranged
-    params. water_level_pct has no threshold columns, so it is display-only and
-    not evaluated. Pure function — no IO."""
-    params = {}
-    for param, (lo_key, hi_key) in _PARAM_KEYS.items():
-        params[param] = _param_status(
-            reading.get(param), float(thresholds[lo_key]), float(thresholds[hi_key])
-        )
-    violated = [p for p, s in params.items() if s != "normal"]
-    status = "normal"
-    for s in params.values():
-        if _RANK[s] > _RANK[status]:
-            status = s
-    return {"status": status, "violated_params": violated, "params": params}
+    """Zone status is EC-only (the single arbitrated resource). pH and water
+    temperature are advisory `indicators` (in_range/out_of_range) — displayed
+    but never escalating status or raising alerts. water_level has no
+    thresholds and stays a display-only numeric. Pure function — no IO."""
+    status = _ec_status(reading.get("ec"), float(thresholds["ec_min"]), float(thresholds["ec_max"]))
+    indicators = {
+        "ph": _range_indicator(reading.get("ph"), float(thresholds["ph_min"]), float(thresholds["ph_max"])),
+        "water_temp_c": _range_indicator(reading.get("water_temp_c"), float(thresholds["temp_min"]), float(thresholds["temp_max"])),
+    }
+    return {
+        "status": status,
+        "violated_params": ["ec"] if status != "normal" else [],
+        "indicators": indicators,
+    }

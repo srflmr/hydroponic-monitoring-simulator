@@ -186,7 +186,7 @@
   .mobile-nav button.active { color: var(--ok); background: var(--accent-soft); }
   .mobile-nav button:focus-visible { outline: 2px solid var(--ok); outline-offset: 2px; }
 
-  @media (max-width: 640px) {
+  @media (max-width: 800px) {
     header {
       gap: var(--space-2);
     }

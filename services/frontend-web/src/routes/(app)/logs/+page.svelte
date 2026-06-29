@@ -13,8 +13,8 @@
   <ArbitrationLog logs={rows} variant="row" title="" />
 </section>
 <style>
-  .page { width: 100%; max-width: var(--page-max); margin-inline: auto; padding: 30px clamp(16px, 4vw, 32px) 40px; display: flex; flex-direction: column; gap: 22px; }
-  .pagehead { display: flex; flex-direction: column; gap: 4px; }
-  .pagehead .h { font-size: 24px; font-weight: 700; letter-spacing: -.01em; }
-  .pagehead .s { font-size: 14px; color: var(--ink-3); }
+  .page { width: 100%; max-width: var(--page-max); margin-inline: auto; padding: var(--space-8) clamp(var(--space-4), 4vw, var(--space-8)) var(--space-10); display: flex; flex-direction: column; gap: var(--space-6); }
+  .pagehead { display: flex; flex-direction: column; gap: var(--space-1); }
+  .pagehead .h { font-size: var(--text-xl); font-weight: 700; letter-spacing: -.01em; }
+  .pagehead .s { font-size: var(--text-base); color: var(--ink-3); }
 </style>

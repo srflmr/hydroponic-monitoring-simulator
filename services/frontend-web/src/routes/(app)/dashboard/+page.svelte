@@ -42,19 +42,19 @@
 </section>
 
 <style>
-  .page { width: 100%; max-width: var(--page-max); margin-inline: auto; padding: 30px clamp(16px, 4vw, 32px) 40px; display: flex; flex-direction: column; gap: 22px; }
-  .pagehead { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
-  .intro { display: flex; flex-direction: column; gap: 4px; }
-  .intro .h { font-size: 24px; font-weight: 700; letter-spacing: -.01em; }
-  .intro .s { font-size: 14px; color: var(--ink-3); }
-  .zones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .bottom { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 20px; }
-  .pending-row { display: grid; grid-template-columns: minmax(0, 380px); gap: 20px; }
+  .page { width: 100%; max-width: var(--page-max); margin-inline: auto; padding: var(--space-8) clamp(var(--space-4), 4vw, var(--space-8)) var(--space-10); display: flex; flex-direction: column; gap: var(--space-6); }
+  .pagehead { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3); }
+  .intro { display: flex; flex-direction: column; gap: var(--space-1); }
+  .intro .h { font-size: var(--text-xl); font-weight: 700; letter-spacing: -.01em; }
+  .intro .s { font-size: var(--text-base); color: var(--ink-3); }
+  .zones { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+  .bottom { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: var(--space-5); }
+  .pending-row { display: grid; grid-template-columns: minmax(0, 380px); gap: var(--space-5); }
 
   .demo {
-    border: none; cursor: pointer; padding: 10px 18px; border-radius: var(--radius-xs);
+    border: none; cursor: pointer; padding: var(--space-3) var(--space-4); border-radius: var(--radius-xs);
     background: var(--warn-ring, #d97b1e); color: #fff;
-    font-family: var(--font); font-size: 14px; font-weight: 700; letter-spacing: .02em;
+    font-family: var(--font); font-size: var(--text-base); font-weight: 700; letter-spacing: .02em;
     box-shadow: inset 0 -3px 0 rgba(0,0,0,.12);
   }
   .demo:hover { filter: brightness(1.1); }

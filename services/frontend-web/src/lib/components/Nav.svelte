@@ -65,6 +65,7 @@
       class="hamburger"
       class:open={navOpen}
       aria-label="Toggle navigation menu"
+      aria-haspopup="menu"
       aria-expanded={navOpen}
       on:click={toggleNav}
     >
@@ -112,7 +113,7 @@
   }
 
   .right { display: flex; align-items: center; gap: var(--space-4); }
-  .live { display: flex; align-items: center; gap: var(--space-2); padding: 7px var(--space-3); background: var(--accent-soft); border-radius: 999px; }
+  .live { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); background: var(--accent-soft); border-radius: 999px; }
   .live .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok-ring); animation: livePulse 1.8s ease-in-out infinite; }
   .live .lbl { font-size: var(--text-sm); font-weight: 600; color: var(--ok); }
   .live .clock { font-family: var(--mono); font-size: var(--text-sm); color: var(--ok); }
@@ -135,12 +136,12 @@
     box-shadow: 0 14px 34px -16px rgba(60,48,30,.4); padding: var(--space-2); z-index: 30;
     display: flex; flex-direction: column; gap: 2px;
   }
-  .meta { padding: var(--space-2) var(--space-3) var(--space-2); border-bottom: 1px solid var(--hair-2); display: flex; flex-direction: column; gap: 1px; }
+  .meta { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--hair-2); display: flex; flex-direction: column; gap: 1px; }
   .mname { font-size: var(--text-base); font-weight: 600; color: var(--ink); }
   .memail { font-size: var(--text-xs); color: var(--muted); }
   .signout {
     border: none; background: none; cursor: pointer; text-align: left;
-    padding: 11px var(--space-3); border-radius: 9px; font-family: var(--font);
+    padding: var(--space-3); border-radius: 9px; font-family: var(--font);
     font-size: var(--text-base); font-weight: 600; color: var(--crit);
   }
   .signout:hover { background: var(--crit-soft); }
@@ -177,7 +178,7 @@
   }
   .mobile-nav button {
     border: none; background: none; cursor: pointer; text-align: left;
-    padding: var(--space-3) var(--space-3); border-radius: 10px;
+    padding: var(--space-3); border-radius: 10px;
     font-family: var(--font); font-size: var(--text-base); font-weight: 600; color: var(--ink-3);
     width: 100%;
   }

@@ -556,7 +556,8 @@
     {
       "id": 10,
       "type": "timeseries",
-      "title": "Network IO eth0",
+      "title": "Network IO (monitoring bridge)",
+      "description": "node-exporter runs on the monitoring bridge (network separation preserved); this shows its container interface, not the WSL host NIC — host-level NIC stats would require host networking, intentionally not used here.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -598,24 +599,24 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(node_network_receive_bytes_total{device=\"eth0\"}[5m])",
+          "expr": "rate(node_network_receive_bytes_total{device!~\"lo\"}[5m])",
           "refId": "A",
           "editorMode": "code",
           "range": true,
           "instant": false,
-          "legendFormat": "Receive"
+          "legendFormat": "{{device}}"
         },
         {
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "rate(node_network_transmit_bytes_total{device=\"eth0\"}[5m])",
+          "expr": "rate(node_network_transmit_bytes_total{device!~\"lo\"}[5m])",
           "refId": "B",
           "editorMode": "code",
           "range": true,
           "instant": false,
-          "legendFormat": "Transmit"
+          "legendFormat": "{{device}}"
         }
       ]
     }

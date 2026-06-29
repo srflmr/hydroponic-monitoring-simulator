@@ -61,6 +61,12 @@ export async function refillTank(amount) {
   return res.json();
 }
 
+export async function fetchPending() {
+  const res = await fetch(`${BASE}/api/arbitration/pending`);
+  if (!res.ok) throw new Error(`pending ${res.status}`);
+  return res.json();
+}
+
 export async function updateZone(zoneId, fields) {
   const res = await fetch(`${BASE}/api/zones/${zoneId}`, {
     method: 'PUT',

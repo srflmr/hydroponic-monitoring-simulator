@@ -6,6 +6,9 @@ import { connectSocket } from '$lib/socket';
 import { fetchZones, refillTank as apiRefill, updateZone } from '$lib/api-client';
 import { splitName, mapZone, mapTank, mapLog } from './mappers.js';
 import { upsertAlert, clearAlertForZone } from './alerts.js';
+import { pendingToQueue } from './sim-pending.js';
+
+export { pendingToQueue } from './sim-pending.js';
 
 // Re-exported for backward-compat; canonical source is ./mappers.js.
 export { splitName, mapZone, mapTank, mapLog } from './mappers.js';
@@ -34,13 +37,16 @@ function initialState() {
 
 export const farm = writable(initialState());
 
-export function seedFarm({ zones, tank, logs }) {
+export function seedFarm({ zones, tank, logs, pending }) {
+  const { queue, alerts } = pendingToQueue(pending);
   farm.update((s) => ({
     ...s,
     zones: (zones || []).map(mapZone),
     tank: tank ? mapTank(tank) : s.tank,
     logs: (logs && logs.logs ? logs.logs : []).map(mapLog).slice(0, 16),
     decisions: logs && logs.total != null ? logs.total : s.decisions,
+    queue,
+    alerts,
     now: nowStr(),
   }));
 }

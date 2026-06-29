@@ -134,7 +134,7 @@
   .card { min-width: 0; background: var(--surface); border: 1px solid var(--hair); border-radius: var(--radius); padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-5); }
   .top { display: flex; align-items: flex-start; justify-content: space-between; }
   .title { display: flex; flex-direction: column; gap: 3px; }
-  .crop { font-size: 19px; font-weight: 700; }
+  .crop { font-size: var(--text-lg); font-weight: 700; }
   .sub { font-size: var(--text-xs); color: var(--muted); }
   .prio { display: flex; flex-direction: column; gap: var(--space-1); align-items: flex-end; }
   .cap { font-size: var(--text-2xs); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }

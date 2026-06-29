@@ -77,12 +77,12 @@
   .flow { display: flex; align-items: center; gap: var(--space-2); }
   .fdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
   .fdot--idle     { background: var(--muted); opacity: .45; }
-  .fdot--queued   { background: #B07D2A; opacity: .8; }
+  .fdot--queued   { background: var(--warn-ring); opacity: .8; }
   .fdot--receiving { background: var(--nutrient, #4A7C59); opacity: 1; }
   .fcap { font-size: var(--text-2xs); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
   .flabel { font-size: var(--text-sm); font-weight: 500; }
   .flabel--idle     { color: var(--muted); }
-  .flabel--queued   { color: #8A5E1A; }
+  .flabel--queued   { color: var(--warn); }
   .flabel--receiving { color: var(--nutrient, #4A7C59); font-weight: 600; }
   .more { font-size: var(--text-sm); font-weight: 600; color: var(--nutrient); }
   .foot-right { display: flex; align-items: center; gap: var(--space-2); }

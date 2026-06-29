@@ -20,6 +20,7 @@ def test_parse_sample_basic():
         cpu_seconds=6.429345,
         mem_bytes=34_873_344,
         mem_limit_bytes=8_220_446_720,
+        working_set_bytes=34_873_344,  # no inactive_file in _stats helper
         rx_bytes=100,
         tx_bytes=200,
     )
@@ -50,7 +51,7 @@ def test_parse_sample_no_networks_defaults_zero():
 
 
 def test_render_contains_help_type_and_values():
-    sample = ContainerSample("hydroponic-redis-1", "deadbeef0001", 1.5, 1024, 2048, 10, 20)
+    sample = ContainerSample("hydroponic-redis-1", "deadbeef0001", 1.5, 1024, 2048, 900, 10, 20)
     out = render([sample])
     assert "# TYPE container_cpu_usage_seconds_total counter" in out
     assert "# TYPE container_memory_usage_bytes gauge" in out
@@ -60,7 +61,7 @@ def test_render_contains_help_type_and_values():
 
 
 def test_render_escapes_label_values():
-    out = render([ContainerSample('a"b\\c', "id1", 0.0, 0, 0, 0, 0)])
+    out = render([ContainerSample('a"b\\c', "id1", 0.0, 0, 0, 0, 0, 0)])
     assert 'name="a\\"b\\\\c"' in out
 
 
@@ -68,3 +69,33 @@ def test_render_empty_is_valid():
     out = render([])
     assert "# TYPE container_cpu_usage_seconds_total counter" in out
     assert out.endswith("\n")
+
+
+def test_parse_sample_computes_working_set():
+    container = {"Names": ["/c1"], "Id": "abcdef123456xxxx"}
+    stats = {
+        "cpu_stats": {"cpu_usage": {"total_usage": 2_000_000_000}},
+        "memory_stats": {"usage": 200_000_000, "limit": 8_000_000_000,
+                          "stats": {"inactive_file": 90_000_000}},
+        "networks": {"eth0": {"rx_bytes": 10, "tx_bytes": 20}},
+    }
+    s = parse_sample(container, stats)
+    assert s.mem_bytes == 200_000_000
+    assert s.working_set_bytes == 110_000_000  # usage - inactive_file
+
+
+def test_working_set_defaults_to_usage_when_inactive_file_absent():
+    container = {"Names": ["/c2"], "Id": "abcdef1234567890"}
+    stats = {"cpu_stats": {"cpu_usage": {"total_usage": 0}},
+             "memory_stats": {"usage": 50, "limit": 100}, "networks": {}}
+    s = parse_sample(container, stats)
+    assert s.working_set_bytes == 50
+
+
+def test_render_includes_working_set_metric():
+    container = {"Names": ["/c3"], "Id": "abcdef1234567890"}
+    stats = {"cpu_stats": {"cpu_usage": {"total_usage": 0}},
+             "memory_stats": {"usage": 50, "limit": 100, "stats": {"inactive_file": 10}}, "networks": {}}
+    out = render([parse_sample(container, stats)])
+    assert "container_memory_working_set_bytes" in out
+    assert 'container_memory_working_set_bytes{name="c3",id="abcdef123456"} 40' in out

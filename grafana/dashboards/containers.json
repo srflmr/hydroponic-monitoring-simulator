@@ -246,7 +246,7 @@
     {
       "id": 2,
       "type": "timeseries",
-      "title": "Memory usage",
+      "title": "Memory (working set)",
       "description": "",
       "datasource": {
         "type": "prometheus",
@@ -299,7 +299,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "container_memory_usage_bytes{job=\"docker-stats\",name=~\"$container\"}",
+          "expr": "container_memory_working_set_bytes{job=\"docker-stats\",name=~\"$container\"}",
           "refId": "A",
           "editorMode": "code",
           "range": true,
@@ -490,7 +490,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "container_memory_usage_bytes{job=\"docker-stats\",name=~\"$container\"}",
+          "expr": "container_memory_working_set_bytes{job=\"docker-stats\",name=~\"$container\"}",
           "refId": "B",
           "editorMode": "code",
           "range": false,

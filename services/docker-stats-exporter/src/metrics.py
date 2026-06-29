@@ -16,6 +16,7 @@ class ContainerSample:
     cpu_seconds: float
     mem_bytes: int
     mem_limit_bytes: int
+    working_set_bytes: int
     rx_bytes: int
     tx_bytes: int
 
@@ -37,12 +38,18 @@ def parse_sample(container: dict, stats: dict) -> ContainerSample | None:
         rx = sum(int(n.get("rx_bytes", 0)) for n in nets.values())
         tx = sum(int(n.get("tx_bytes", 0)) for n in nets.values())
 
+        mem_stats = mem.get("stats") or {}
+        inactive_file = int(mem_stats.get("inactive_file", 0))
+        usage = int(mem.get("usage", 0))
+        working_set = max(0, usage - inactive_file)
+
         return ContainerSample(
             name=name,
             cid=cid,
             cpu_seconds=cpu_ns / 1e9,
-            mem_bytes=int(mem.get("usage", 0)),
+            mem_bytes=usage,
             mem_limit_bytes=int(mem.get("limit", 0)),
+            working_set_bytes=working_set,
             rx_bytes=rx,
             tx_bytes=tx,
         )
@@ -59,6 +66,7 @@ def _escape(value: str) -> str:
 _FAMILIES = [
     ("container_cpu_usage_seconds_total", "Cumulative CPU time consumed, in seconds.", "counter", "cpu_seconds"),
     ("container_memory_usage_bytes", "Current memory usage, in bytes.", "gauge", "mem_bytes"),
+    ("container_memory_working_set_bytes", "Working-set memory in bytes (usage minus inactive_file), matching `docker stats`.", "gauge", "working_set_bytes"),
     ("container_spec_memory_limit_bytes", "Memory limit, in bytes (host memory when unlimited).", "gauge", "mem_limit_bytes"),
     ("container_network_receive_bytes_total", "Cumulative bytes received over the network.", "counter", "rx_bytes"),
     ("container_network_transmit_bytes_total", "Cumulative bytes transmitted over the network.", "counter", "tx_bytes"),

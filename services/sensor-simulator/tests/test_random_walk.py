@@ -1,4 +1,4 @@
-from src.random_walk import next_value, PARAM_BOUNDS
+from src.random_walk import next_value, revert, REVERSION_FRAC, PARAM_BOUNDS
 
 
 def test_next_value_stays_within_bounds():
@@ -12,9 +12,6 @@ def test_next_value_stays_within_bounds():
 def test_next_value_moves_within_one_step():
     result = next_value("ph", 6.0)
     assert abs(result - 6.0) <= 0.1
-
-
-from src.random_walk import next_value, revert, REVERSION_FRAC
 
 
 def test_revert_pulls_toward_setpoint():

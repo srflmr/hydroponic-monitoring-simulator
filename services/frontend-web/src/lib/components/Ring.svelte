@@ -29,15 +29,15 @@
 </div>
 
 <style>
-  .ring { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .ring { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
   .dial { position: relative; }
   .val {
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
-    font-family: var(--mono); font-weight: 600; font-size: 15px; color: var(--ink);
+    font-family: var(--mono); font-weight: 600; font-size: var(--text-sm); color: var(--ink);
   }
   .lab {
-    font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    font-size: var(--text-2xs); letter-spacing: .08em; text-transform: uppercase;
     color: var(--muted); font-weight: 600;
   }
 </style>

@@ -12,9 +12,9 @@
 
 <style>
   .pill {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 6px 12px; border-radius: 999px;
-    font-size: 12px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    padding: var(--space-2) var(--space-3); border-radius: 999px;
+    font-size: var(--text-xs); font-weight: 600;
   }
   .dot { width: 8px; height: 8px; border-radius: 50%; }
 </style>

@@ -13,7 +13,8 @@
   $: temp = metric('temp', zone.temp, zone.th.tempMin, zone.th.tempMax);
   $: level = metric('level', zone.level, 80, 100);
   $: status = zoneStatus(zone);
-  $: flowLabel = flow ? 'Receiving nutrient' : queued ? 'Queued for nutrient' : 'Stable';
+  $: flowState = flow ? 'receiving' : queued ? 'queued' : 'idle';
+  $: flowLabel = flow ? 'Receiving nutrient' : queued ? 'Queued' : 'Idle';
   $: actuated = !!($farm.actuated && $farm.actuated[zone.id]);
 </script>
 
@@ -42,8 +43,9 @@
 
   <div class="foot">
     <div class="flow">
-      <span class="fdot" style="background:{flow ? status.dot : '#C7BBA1'}; opacity:{flow ? 1 : 0.6}"></span>
-      <span class="flabel">{flowLabel}</span>
+      <span class="fdot fdot--{flowState}"></span>
+      <span class="fcap">Flow:</span>
+      <span class="flabel flabel--{flowState}">{flowLabel}</span>
     </div>
     <div class="foot-right">
       {#if actuated}<span class="actuated" title="Valve actuated">✓ actuated</span>{/if}
@@ -55,27 +57,34 @@
 <style>
   .card {
     background: var(--surface); border: 1px solid var(--hair); border-radius: var(--radius);
-    padding: 22px; display: flex; flex-direction: column; gap: 18px;
+    padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-4);
     text-decoration: none; color: inherit; cursor: pointer;
     transition: transform .15s ease, box-shadow .15s ease;
   }
   .card:hover { transform: translateY(-3px); box-shadow: 0 14px 34px -20px rgba(60,48,30,.4); }
   .top { display: flex; align-items: flex-start; justify-content: space-between; }
-  .title { display: flex; flex-direction: column; gap: 3px; }
-  .crop { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
-  .sub { font-size: 12px; color: var(--muted); }
-  .rings { display: flex; justify-content: space-between; padding: 4px 6px; }
-  .level { display: flex; flex-direction: column; gap: 8px; }
+  .title { display: flex; flex-direction: column; gap: var(--space-1); }
+  .crop { font-size: var(--text-lg); font-weight: 700; letter-spacing: -.01em; }
+  .sub { font-size: var(--text-xs); color: var(--muted); }
+  .rings { display: flex; justify-content: space-between; padding: var(--space-1) var(--space-2); }
+  .level { display: flex; flex-direction: column; gap: var(--space-2); }
   .level-head { display: flex; align-items: baseline; justify-content: space-between; }
-  .cap { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-  .pct { font-family: var(--mono); font-size: 14px; font-weight: 600; }
+  .cap { font-size: var(--text-xs); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .pct { font-family: var(--mono); font-size: var(--text-base); font-weight: 600; }
   .track { position: relative; height: 10px; border-radius: 6px; background: var(--bg); overflow: hidden; }
   .fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; }
-  .foot { display: flex; align-items: center; justify-content: space-between; padding-top: 4px; border-top: 1px solid var(--hair-2); }
-  .flow { display: flex; align-items: center; gap: 8px; }
-  .fdot { width: 7px; height: 7px; border-radius: 50%; }
-  .flabel { font-size: 13px; color: var(--ink-3); font-weight: 500; }
-  .more { font-size: 13px; font-weight: 600; color: var(--nutrient); }
-  .foot-right { display: flex; align-items: center; gap: 10px; }
-  .actuated { font-size: 11px; font-weight: 700; color: var(--nutrient-strong, #2F7D32); font-family: var(--mono, monospace); }
+  .foot { display: flex; align-items: center; justify-content: space-between; padding-top: var(--space-1); border-top: 1px solid var(--hair-2); }
+  .flow { display: flex; align-items: center; gap: var(--space-2); }
+  .fdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .fdot--idle     { background: var(--muted); opacity: .45; }
+  .fdot--queued   { background: #B07D2A; opacity: .8; }
+  .fdot--receiving { background: var(--nutrient, #4A7C59); opacity: 1; }
+  .fcap { font-size: var(--text-2xs); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .flabel { font-size: var(--text-sm); font-weight: 500; }
+  .flabel--idle     { color: var(--muted); }
+  .flabel--queued   { color: #8A5E1A; }
+  .flabel--receiving { color: var(--nutrient, #4A7C59); font-weight: 600; }
+  .more { font-size: var(--text-sm); font-weight: 600; color: var(--nutrient); }
+  .foot-right { display: flex; align-items: center; gap: var(--space-2); }
+  .actuated { font-size: var(--text-2xs); font-weight: 700; color: var(--nutrient-strong, #2F7D32); font-family: var(--mono, monospace); }
 </style>

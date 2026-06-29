@@ -33,6 +33,10 @@ async function fetchLogs(limit, offset) {
   return getJson(`${RESOURCE_ARBITRATION_URL}/logs?limit=${limit}&offset=${offset}`);
 }
 
+async function fetchPending() {
+  return getJson(`${RESOURCE_ARBITRATION_URL}/requests/pending`);
+}
+
 async function forwardZoneWrite(method, path, body) {
   const res = await fetch(`${ZONE_CONFIG_URL}${path}`, {
     method,
@@ -76,6 +80,7 @@ module.exports = {
   fetchZoneCurrent,
   fetchTank,
   fetchLogs,
+  fetchPending,
   postSimulate,
   forwardZoneWrite,
   forwardTankRefill,

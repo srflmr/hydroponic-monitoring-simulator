@@ -31,6 +31,7 @@ app.use(zonesRouter);
 app.use(tankRouter);
 app.use(logsRouter);
 app.use(simulateRouter);
+app.use(require('./routes/arbitration'));
 
 const server = http.createServer(app);
 initSockets(server);

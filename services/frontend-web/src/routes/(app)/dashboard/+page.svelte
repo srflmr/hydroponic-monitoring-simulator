@@ -1,5 +1,5 @@
 <script>
-  import { farm } from '$lib/sim.js';
+  import { farm, triggerContention } from '$lib/sim.js';
   import ZoneCard from '$lib/components/ZoneCard.svelte';
   import TankGauge from '$lib/components/TankGauge.svelte';
   import ArbitrationLog from '$lib/components/ArbitrationLog.svelte';
@@ -19,6 +19,7 @@
       <span class="h">Live overview</span>
       <span class="s">All zones updating in real time · select a zone for detail</span>
     </div>
+    <button class="demo" on:click={() => triggerContention()}>Trigger contention (all zones)</button>
   </div>
 
   <AlertBar />
@@ -43,6 +44,14 @@
   .intro .s { font-size: 14px; color: var(--ink-3); }
   .zones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   .bottom { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 20px; }
+
+  .demo {
+    border: none; cursor: pointer; padding: 10px 18px; border-radius: var(--radius-xs);
+    background: var(--warn-ring, #d97b1e); color: #fff;
+    font-family: var(--font); font-size: 14px; font-weight: 700; letter-spacing: .02em;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,.12);
+  }
+  .demo:hover { filter: brightness(1.1); }
 
   @media (max-width: 1180px) { .zones { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 900px)  { .bottom { grid-template-columns: 1fr; } }

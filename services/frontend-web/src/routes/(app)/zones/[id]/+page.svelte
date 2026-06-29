@@ -53,6 +53,29 @@
       simMsg = 'Could not trigger simulation';
     }
   }
+
+  async function triggerEcCritical(zoneId) {
+    if (!zone) return;
+    simMsg = '';
+    try {
+      await postSimulate(zoneId, 'ec', zone.th.ecMin * 0.5, 60);
+      simMsg = 'EC critical preset triggered (60 s)';
+    } catch (e) {
+      simMsg = 'Could not trigger EC critical preset';
+    }
+  }
+
+  async function triggerEcNormal(zoneId) {
+    if (!zone) return;
+    simMsg = '';
+    try {
+      const mid = (zone.th.ecMin + zone.th.ecMax) / 2;
+      await postSimulate(zoneId, 'ec', mid, 5);
+      simMsg = 'EC normal preset triggered (5 s)';
+    } catch (e) {
+      simMsg = 'Could not trigger EC normal preset';
+    }
+  }
 </script>
 
 <svelte:head><title>{zone ? zone.crop : 'Zone'} · HMS</title></svelte:head>
@@ -122,6 +145,10 @@
   {#if zone}
   <section class="simulate">
     <h3>Trigger simulation</h3>
+    <div class="sim-presets">
+      <button class="preset crit" on:click={() => triggerEcCritical(id)}>EC critical (60 s)</button>
+      <button class="preset ok" on:click={() => triggerEcNormal(id)}>EC normal (5 s)</button>
+    </div>
     <div class="sim-form">
       <select bind:value={simParam} aria-label="Parameter">
         <option value="ph">ph</option>
@@ -184,6 +211,12 @@
 
   .simulate { margin-top: 24px; }
   .simulate h3 { font-size: 15px; font-weight: 700; margin: 0 0 12px; color: var(--ink); }
+  .sim-presets { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .preset { border: none; cursor: pointer; padding: 9px 16px; border-radius: var(--radius-sm, 8px); font-family: var(--font, inherit); font-size: 14px; font-weight: 700; }
+  .preset.crit { background: var(--crit-ring, #c0392b); color: #fff; }
+  .preset.crit:hover { filter: brightness(1.1); }
+  .preset.ok { background: var(--accent-soft, #e0f0d0); color: var(--ok, #4b8f3f); }
+  .preset.ok:hover { background: #D6E2C0; }
   .sim-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
   .sim-form select, .sim-form input { padding: 8px 10px; border-radius: var(--radius-sm, 8px); border: 1px solid var(--line, #d8d2c0); font-family: var(--font, inherit); }
   .sim-form input { width: 110px; }

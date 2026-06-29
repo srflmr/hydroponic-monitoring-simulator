@@ -3,7 +3,7 @@
 
 import { writable } from 'svelte/store';
 import { connectSocket } from '$lib/socket';
-import { fetchZones, refillTank as apiRefill, updateZone } from '$lib/api-client';
+import { fetchZones, refillTank as apiRefill, updateZone, setTankVolume, postSimulate } from '$lib/api-client';
 import { splitName, mapZone, mapTank, mapLog } from './mappers.js';
 import { upsertAlert, clearAlertForZone } from './alerts.js';
 import { pendingToQueue } from './sim-pending.js';
@@ -120,6 +120,18 @@ export async function refillTank(amount) {
   } catch (_e) {
     // A tank:update WS event may still follow; ignore the REST error.
   }
+}
+
+export async function forceTankLow(volume = 20) {
+  try {
+    const tank = await setTankVolume(volume);
+    if (tank) farm.update((s) => ({ ...s, tank: mapTank(tank) }));
+  } catch (_e) { /* WS tank:update may follow */ }
+}
+
+export async function triggerContention(value = 0.4, duration = 30) {
+  const zones = await fetchZones().catch(() => []);
+  await Promise.all(zones.map((z) => postSimulate(z.zone_id, 'ec', value, duration).catch(() => null)));
 }
 
 // draft shape: { [zoneId]: { phMin, phMax, ecMin, ecMax, tempMin, tempMax, priority } }

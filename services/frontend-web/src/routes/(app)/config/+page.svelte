@@ -130,8 +130,8 @@
   .save { border: none; cursor: pointer; padding: 11px 20px; border-radius: 12px; background: var(--nutrient); color: var(--header); font-family: var(--font); font-size: 14px; font-weight: 700; box-shadow: inset 0 -3px 0 rgba(0,0,0,.1); }
   .save:hover { background: var(--nutrient-strong); }
 
-  .grid { width: 100%; min-width: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .card { background: var(--surface); border: 1px solid var(--hair); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+  .grid { width: 100%; min-width: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .card { min-width: 0; background: var(--surface); border: 1px solid var(--hair); border-radius: var(--radius); padding: 24px; display: flex; flex-direction: column; gap: 20px; }
   .top { display: flex; align-items: flex-start; justify-content: space-between; }
   .title { display: flex; flex-direction: column; gap: 3px; }
   .crop { font-size: 19px; font-weight: 700; }
@@ -164,6 +164,6 @@
   .toast-error .tdot { background: #FFAAAA; }
   .toast span:last-child { font-size: 14px; font-weight: 600; }
 
-  @media (max-width: 1180px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 1240px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 620px)  { .grid { grid-template-columns: 1fr; } }
 </style>

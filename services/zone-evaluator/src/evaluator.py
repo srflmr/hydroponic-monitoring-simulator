@@ -1,5 +1,11 @@
 WARNING_MARGIN_FRAC = 0.1
 
+
+def violation_edge(ec, ec_min, was_in_violation: bool):
+    """Edge-trigger: enqueue only on the transition INTO EC violation."""
+    now = ec is not None and ec < float(ec_min)
+    return (now and not was_in_violation), now
+
 # reading key -> (min threshold key, max threshold key)
 _PARAM_KEYS = {
     "ph": ("ph_min", "ph_max"),

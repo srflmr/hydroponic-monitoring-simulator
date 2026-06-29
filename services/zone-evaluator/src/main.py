@@ -8,7 +8,7 @@ import redis
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
-from .evaluator import evaluate_reading
+from .evaluator import evaluate_reading, violation_edge
 from .zone_config_client import get_thresholds, ping as zone_config_ping
 
 REDIS_URL = os.environ["REDIS_URL"]
@@ -18,6 +18,7 @@ RESOURCE_QUEUE = "queue:resource_requests"
 r = redis.from_url(REDIS_URL, decode_responses=True)
 
 _last_eval = {}  # zone_id -> evaluation dict
+_violation = {}  # zone_id -> bool, for edge-triggered enqueue
 _lock = threading.Lock()
 
 
@@ -55,7 +56,9 @@ def _process(reading):
             "evaluated_at": _now_iso(),
         }
     ec = reading.get("ec")
-    if ec is not None and ec < thresholds["ec_min"]:
+    enqueue, now_violating = violation_edge(ec, thresholds["ec_min"], _violation.get(zone_id, False))
+    _violation[zone_id] = now_violating
+    if enqueue:
         request = _make_request(reading, thresholds["ec_min"])
         r.lpush(RESOURCE_QUEUE, json.dumps(request))
         print(

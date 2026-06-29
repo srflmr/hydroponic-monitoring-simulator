@@ -1,6 +1,5 @@
 import { json } from '@sveltejs/kit';
-
-const BASE = process.env.DASHBOARD_API_INTERNAL_URL || 'http://dashboard-api:3010';
+import { setTankVolume } from '$lib/api-client';
 
 export async function POST({ request }) {
   let body;
@@ -16,14 +15,8 @@ export async function POST({ request }) {
   }
 
   try {
-    const res = await fetch(`${BASE}/api/tank/set`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ volume }),
-    });
-    const data = await res.json().catch(() => null);
-    return json(data, { status: res.status });
-  } catch {
-    return json({ error: 'upstream_unavailable' }, { status: 502 });
+    return json(await setTankVolume(volume));
+  } catch (err) {
+    return json({ error: 'upstream_unavailable', message: err.message }, { status: 502 });
   }
 }

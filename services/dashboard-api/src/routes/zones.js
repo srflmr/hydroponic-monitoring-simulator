@@ -19,11 +19,13 @@ router.get('/api/zones', async (req, res) => {
         } catch (err) {
           current = null;
         }
+        // Advisory pH/temp `indicators` are intentionally NOT forwarded: the
+        // frontend recomputes status EC-only client-side (data.js metricStatus),
+        // so pH/temp render as advisory rings without a backend round-trip.
         return {
           ...zone,
           status: current ? current.status : null,
           violated_params: current ? current.violated_params : [],
-          indicators: current ? current.indicators : {},
           last_reading: current ? current.last_reading : null,
         };
       }),

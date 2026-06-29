@@ -49,7 +49,7 @@
   .intro .s { font-size: 14px; color: var(--ink-3); }
   .zones { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   .bottom { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 20px; }
-  .pending-row { display: grid; grid-template-columns: 380px; gap: 20px; }
+  .pending-row { display: grid; grid-template-columns: minmax(0, 380px); gap: 20px; }
 
   .demo {
     border: none; cursor: pointer; padding: 10px 18px; border-radius: var(--radius-xs);

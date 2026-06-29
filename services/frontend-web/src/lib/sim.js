@@ -69,11 +69,11 @@ export function connectStream() {
   socket.on('arbitration:log', (l) => farm.update((s) => {
     const log = mapLog(l);
     const serving = { ...s.serving };
-    let queue = s.queue.filter((id) => id !== l.zone_id);
+    let queue = s.queue.filter((q) => q.zone_id !== l.zone_id);
     if (l.decision === 'fulfilled') {
       serving[l.zone_id] = Date.now();
     } else if (l.decision === 'queued') {
-      queue = [...queue, l.zone_id];
+      queue = [...queue, { zone_id: l.zone_id, score: l.score }];
     }
     const alerts = l.decision === 'fulfilled' ? clearAlertForZone(s.alerts, l.zone_id) : s.alerts;
     return { ...s, logs: [log, ...s.logs].slice(0, 16), decisions: s.decisions + 1, serving, queue, alerts };

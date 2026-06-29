@@ -37,13 +37,13 @@
 
 <style>
   .chart {
-    background: var(--surface); border: 1px solid var(--hair); border-radius: 20px;
-    padding: 20px; display: flex; flex-direction: column; gap: 14px;
+    background: var(--surface); border: 1px solid var(--hair); border-radius: var(--radius);
+    padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-3);
   }
   .head { display: flex; align-items: flex-start; justify-content: space-between; }
   .meta { display: flex; flex-direction: column; gap: 3px; }
-  .title { font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-  .band { font-size: 12px; color: #B6A98E; }
-  .now { font-family: var(--mono); font-size: 22px; font-weight: 700; }
+  .title { font-size: var(--text-sm); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .band { font-size: var(--text-xs); color: #B6A98E; }
+  .now { font-family: var(--mono); font-size: var(--text-lg); font-weight: 700; }
   svg { width: 100%; height: 120px; }
 </style>

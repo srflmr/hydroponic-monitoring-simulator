@@ -45,32 +45,32 @@
 <style>
   .tank {
     background: var(--surface); border: 1px solid var(--hair); border-radius: var(--radius);
-    padding: 24px; display: flex; flex-direction: column; gap: 18px;
+    padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-5);
   }
   .head { display: flex; align-items: center; justify-content: space-between; }
-  .cap { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-  .status { font-size: 12px; font-weight: 600; }
-  .body { display: flex; gap: 22px; align-items: center; }
+  .cap { font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .status { font-size: var(--text-xs); font-weight: 600; }
+  .body { display: flex; gap: var(--space-5); align-items: center; }
   .vessel {
     position: relative; width: 104px; height: 184px; border-radius: 18px;
     background: var(--bg); overflow: hidden; border: 1px solid #E2D8C0;
   }
   .liquid { position: absolute; left: 0; right: 0; bottom: 0; transition: height .6s ease; }
   .surface { position: absolute; left: 0; right: 0; height: 6px; background: rgba(255,255,255,.45); animation: ripple 3s ease-in-out infinite; }
-  .readout { display: flex; flex-direction: column; gap: 6px; }
-  .big { font-family: var(--mono); font-size: 42px; font-weight: 700; line-height: 1; }
-  .unit { font-size: 20px; color: var(--muted); }
-  .line { font-size: 13px; color: var(--ink-3); }
-  .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .readout { display: flex; flex-direction: column; gap: var(--space-2); }
+  .big { font-family: var(--mono); font-size: var(--text-display); font-weight: 700; line-height: 1; }
+  .unit { font-size: var(--text-lg); color: var(--muted); }
+  .line { font-size: var(--text-sm); color: var(--ink-3); }
+  .controls { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
   .controls input {
-    flex: 0 0 80px; padding: 10px 10px; border-radius: var(--radius-sm); border: 1px solid #E2D8C0;
-    font-family: var(--font); font-size: 14px; background: var(--bg); color: var(--ink);
+    flex: 0 0 80px; padding: var(--space-3) var(--space-3); border-radius: var(--radius-sm); border: 1px solid #E2D8C0;
+    font-family: var(--font); font-size: var(--text-base); background: var(--bg); color: var(--ink);
     width: 80px;
   }
   button {
-    border: none; cursor: pointer; padding: 11px 16px; border-radius: var(--radius-sm);
+    border: none; cursor: pointer; padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm);
     background: var(--nutrient); color: var(--header);
-    font-family: var(--font); font-size: 14px; font-weight: 700; letter-spacing: .02em;
+    font-family: var(--font); font-size: var(--text-base); font-weight: 700; letter-spacing: .02em;
     box-shadow: inset 0 -3px 0 rgba(0,0,0,.1);
   }
   button:hover { background: var(--nutrient-strong); }

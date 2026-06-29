@@ -39,26 +39,26 @@
 <style>
   .log {
     background: var(--surface); border: 1px solid var(--hair); border-radius: var(--radius);
-    padding: 24px; display: flex; flex-direction: column; gap: 14px;
+    padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-3);
   }
-  .head { display: flex; align-items: center; gap: 10px; }
-  .cap { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  .head { display: flex; align-items: center; gap: var(--space-3); }
+  .cap { font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
   .live { width: 7px; height: 7px; border-radius: 50%; background: var(--warn-ring); animation: livePulse 1.8s ease-in-out infinite; }
   .items { display: flex; flex-direction: column; }
 
-  .empty { font-size: 13px; color: var(--muted); padding: 8px 0; }
+  .empty { font-size: var(--text-sm); color: var(--muted); padding: var(--space-2) 0; }
 
-  .row { display: flex; align-items: center; gap: 16px; padding: 11px 0; border-bottom: 1px solid var(--hair-2); }
+  .row { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid var(--hair-2); }
   .row:last-child { border-bottom: none; }
-  .tag { display: flex; align-items: center; gap: 7px; width: 118px; flex-shrink: 0; }
+  .tag { display: flex; align-items: center; gap: var(--space-2); width: 118px; flex-shrink: 0; }
   .sym {
-    width: 18px; height: 18px; border-radius: 6px; font-size: 11px; font-weight: 700;
+    width: 18px; height: 18px; border-radius: 6px; font-size: var(--text-2xs); font-weight: 700;
     display: flex; align-items: center; justify-content: center;
     background: var(--warn-soft); color: var(--warn);
   }
-  .label { font-size: 13px; font-weight: 600; color: var(--warn); }
-  .zone { font-size: 13px; font-weight: 600; color: var(--ink-2); flex: 1; }
-  .score { font-family: var(--mono); font-size: 12px; color: var(--muted); flex-shrink: 0; }
+  .label { font-size: var(--text-sm); font-weight: 600; color: var(--warn); }
+  .zone { font-size: var(--text-sm); font-weight: 600; color: var(--ink-2); flex: 1; }
+  .score { font-family: var(--mono); font-size: var(--text-xs); color: var(--muted); flex-shrink: 0; }
 
   @keyframes livePulse {
     0%, 100% { opacity: 1; }

@@ -34,9 +34,13 @@ export function mapTank(t) {
   return { volume: Number(t.current_volume), capacity: Number(t.capacity) };
 }
 
-export function fmtTime(iso) {
-  const m = /T(\d{2}:\d{2}:\d{2})/.exec(iso || '');
-  return m ? m[1] : '';
+export function fmtTime(iso, tz = Intl.DateTimeFormat().resolvedOptions().timeZone) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: tz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+  }).format(d);
 }
 
 export function mapLog(l) {

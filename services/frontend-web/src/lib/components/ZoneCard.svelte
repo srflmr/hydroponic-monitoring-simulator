@@ -38,9 +38,9 @@
     <Glossary term="Temp" definition="Water temperature (°C). Advisory only — never triggers a critical alert.">Temp</Glossary>
   </div>
   <div class="rings">
-    <Ring label="pH"   value={ph.value}   pct={ph.pct}   ring={ph.ring}   soft={ph.soft} />
-    <Ring label="EC"   value={ec.value}   pct={ec.pct}   ring={ec.ring}   soft={ec.soft} />
-    <Ring label="Temp" value={temp.value} pct={temp.pct} ring={temp.ring} soft={temp.soft} />
+    <Ring label=""   value={ph.value}   pct={ph.pct}   ring={ph.ring}   soft={ph.soft} />
+    <Ring label=""   value={ec.value}   pct={ec.pct}   ring={ec.ring}   soft={ec.soft} />
+    <Ring label=""   value={temp.value} pct={temp.pct} ring={temp.ring} soft={temp.soft} />
   </div>
 
   <div class="level">

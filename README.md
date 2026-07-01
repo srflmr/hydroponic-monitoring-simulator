@@ -39,8 +39,8 @@ docker compose ps
 | What | URL | Notes |
 |---|---|---|
 | Dashboard | https://hydroponic.localhost | self-signed cert (accept the warning); public landing → log in via Authelia → gated `/dashboard` |
-| Auth portal | https://auth.hydroponic.localhost | operator credentials from `.env` (`OPERATOR_USERNAME` / `OPERATOR_PASSWORD`) |
-| Grafana | https://grafana.hydroponic.localhost | behind Authelia (auth-proxy, no separate login); **Monitoring** folder → *Overview*, *Host · Node Exporter Full*, *Containers* dashboards |
+| Auth portal | https://auth.hydroponic.localhost | operator credentials in `authelia/users_database.yml` (gitignored — see `authelia/users_database.yml.example` for the generation command) |
+| Grafana | https://grafana.hydroponic.localhost | behind Authelia (auth-proxy, no separate login); **Monitoring** folder → *Host*, *Containers* dashboards |
 
 ## Demo (PRD §11 scenarios)
 
@@ -55,4 +55,4 @@ docker compose ps
 
 ## Project layout
 
-`services/` (per-service code) · `traefik/`, `authelia/`, `mosquitto/`, `postgres/init/`, `prometheus/`, `grafana/` (infra config) · `scripts/` (demo shortcuts) · one root `docker-compose.yml`.
+`services/` (per-service code) · `traefik/`, `authelia/`, `mosquitto/`, `postgres/init/`, `prometheus/`, `grafana/` (infra config) · `scripts/` (placeholder, demo is UI-driven) · one root `docker-compose.yml`.

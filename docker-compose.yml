@@ -21,7 +21,7 @@ volumes:
 
 services:
   traefik:
-    image: traefik:v3.2.1
+    image: traefik:v3.7.6
     restart: unless-stopped
     command:
       - "--configFile=/etc/traefik/traefik.yml"
@@ -158,7 +158,7 @@ services:
       retries: 5
 
   mosquitto:
-    image: eclipse-mosquitto:2.0.20
+    image: eclipse-mosquitto:2.0.21
     restart: unless-stopped
     environment:
       SENSOR_SIMULATOR_MQTT_PASSWORD: ${SENSOR_SIMULATOR_MQTT_PASSWORD}
@@ -442,7 +442,7 @@ services:
       start_period: 15s
 
   node-exporter:
-    image: prom/node-exporter:v1.8.2
+    image: prom/node-exporter:v1.11.0
     restart: unless-stopped
     command:
       - "--path.rootfs=/host"
@@ -460,7 +460,7 @@ services:
       start_period: 15s
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    image: ghcr.io/google/cadvisor:0.56.2
     restart: unless-stopped
     # cgroup v2: run in the host cgroup namespace so cAdvisor can see the
     # /sys/fs/cgroup/docker/<id> container cgroups (otherwise it is rebased to
@@ -491,7 +491,7 @@ services:
   # GET /containers and /version over TCP (POST disabled), so no container ever
   # holds the root-equivalent docker.sock directly.
   docker-socket-proxy:
-    image: ghcr.io/tecnativa/docker-socket-proxy:0.3.0
+    image: ghcr.io/tecnativa/docker-socket-proxy:v0.4.2
     restart: unless-stopped
     environment:
       CONTAINERS: 1
@@ -529,7 +529,7 @@ services:
       start_period: 15s
 
   prometheus:
-    image: prom/prometheus:v3.0.1
+    image: prom/prometheus:v3.5.4
     restart: unless-stopped
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
@@ -553,7 +553,7 @@ services:
       start_period: 20s
 
   grafana:
-    image: grafana/grafana:11.4.0
+    image: grafana/grafana:11.4.5
     restart: unless-stopped
     environment:
       GF_SERVER_ROOT_URL: https://grafana.hydroponic.localhost

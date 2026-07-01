@@ -1,0 +1,29 @@
+# mosquitto/passwd.example
+#
+# Copy this file to `mosquitto/passwd` (gitignored) and generate real
+# credentials with `mosquitto_passwd`. This file uses the same hashed-line
+# format Mosquitto's own `password_file` directive expects.
+#
+# Generate the whole file in one go (creates the file, first user with -c):
+#
+#   docker run --rm -v "$(pwd)/mosquitto:/mosquitto/config" eclipse-mosquitto:2.0.21 \
+#     mosquitto_passwd -b -c /mosquitto/config/passwd sensor_simulator '<SENSOR_SIMULATOR_MQTT_PASSWORD>'
+#
+# Then add each remaining user (no -c, or the file gets truncated):
+#
+#   docker run --rm -v "$(pwd)/mosquitto:/mosquitto/config" eclipse-mosquitto:2.0.21 \
+#     mosquitto_passwd -b /mosquitto/config/passwd telemetry_ingestion '<TELEMETRY_MQTT_PASSWORD>'
+#   docker run --rm -v "$(pwd)/mosquitto:/mosquitto/config" eclipse-mosquitto:2.0.21 \
+#     mosquitto_passwd -b /mosquitto/config/passwd resource_arbitration '<ARBITRATION_MQTT_PASSWORD>'
+#   docker run --rm -v "$(pwd)/mosquitto:/mosquitto/config" eclipse-mosquitto:2.0.21 \
+#     mosquitto_passwd -b /mosquitto/config/passwd actuator_gateway '<ACTUATOR_MQTT_PASSWORD>'
+#   docker run --rm -v "$(pwd)/mosquitto:/mosquitto/config" eclipse-mosquitto:2.0.21 \
+#     mosquitto_passwd -b /mosquitto/config/passwd dashboard_api '<DASHBOARD_MQTT_PASSWORD>'
+#
+# The passwords used here MUST match SENSOR_SIMULATOR_MQTT_PASSWORD,
+# TELEMETRY_MQTT_PASSWORD, ARBITRATION_MQTT_PASSWORD, ACTUATOR_MQTT_PASSWORD,
+# DASHBOARD_MQTT_PASSWORD in .env — those vars are still used by the
+# CONSUMING services (sensor-simulator, telemetry-ingestion, etc.) to
+# authenticate; only the broker's own file is no longer generated from them
+# at every container start.
+sensor_simulator:$7$101$placeholder_generate_your_own_hash_dont_use_this_literal_line$==

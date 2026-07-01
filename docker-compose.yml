@@ -141,31 +141,21 @@ services:
     image: eclipse-mosquitto:2.0.21
     restart: unless-stopped
     environment:
-      SENSOR_SIMULATOR_MQTT_PASSWORD: ${SENSOR_SIMULATOR_MQTT_PASSWORD}
-      TELEMETRY_MQTT_PASSWORD: ${TELEMETRY_MQTT_PASSWORD}
-      ARBITRATION_MQTT_PASSWORD: ${ARBITRATION_MQTT_PASSWORD}
-      ACTUATOR_MQTT_PASSWORD: ${ACTUATOR_MQTT_PASSWORD}
       DASHBOARD_MQTT_PASSWORD: ${DASHBOARD_MQTT_PASSWORD}
     volumes:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - ./mosquitto/acl:/mosquitto/config/acl:ro
+      - ./mosquitto/passwd:/mosquitto/config/passwd.ro:ro
     entrypoint:
       - sh
       - -c
       - |
-        rm -f /tmp/mosquitto-passwd /tmp/mosquitto-acl
-        P=/tmp/mosquitto-passwd
-        mosquitto_passwd -c -b $$P sensor_simulator "$$SENSOR_SIMULATOR_MQTT_PASSWORD"
-        mosquitto_passwd -b $$P telemetry_ingestion "$$TELEMETRY_MQTT_PASSWORD"
-        mosquitto_passwd -b $$P resource_arbitration "$$ARBITRATION_MQTT_PASSWORD"
-        mosquitto_passwd -b $$P actuator_gateway "$$ACTUATOR_MQTT_PASSWORD"
-        mosquitto_passwd -b $$P dashboard_api "$$DASHBOARD_MQTT_PASSWORD"
-        chown mosquitto:mosquitto $$P
-        chmod 600 $$P
-        A=/tmp/mosquitto-acl
-        cp /mosquitto/config/acl $$A
-        chown mosquitto:mosquitto $$A
-        chmod 0700 $$A
+        cp /mosquitto/config/passwd.ro /tmp/mosquitto-passwd
+        chown mosquitto:mosquitto /tmp/mosquitto-passwd
+        chmod 600 /tmp/mosquitto-passwd
+        cp /mosquitto/config/acl /tmp/mosquitto-acl
+        chown mosquitto:mosquitto /tmp/mosquitto-acl
+        chmod 0700 /tmp/mosquitto-acl
         exec mosquitto -c /mosquitto/config/mosquitto.conf
     networks:
       - internal

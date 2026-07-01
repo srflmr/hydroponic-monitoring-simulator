@@ -21,3 +21,6 @@ dist/
 authelia/db.sqlite3
 authelia/notification.txt
 authelia/users_database.yml
+
+# Mosquitto runtime password file (generated with mosquitto_passwd)
+mosquitto/passwd

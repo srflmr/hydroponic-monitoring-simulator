@@ -48,9 +48,9 @@ docker compose ps
 |---|---|---|
 | 1–2 | Auth gate / login | public landing at `/`; opening `/dashboard` unauthenticated → redirected to Authelia → log in |
 | 3 | Normal condition | all zones live on the dashboard; tank gauge full |
-| 4 | Single-zone low EC | `./scripts/demo-trigger-zone-a.sh` |
-| 5–7 | Multi-zone conflict + refill | `./scripts/demo-trigger-konflik.sh` (prints the refill command for #7) |
-| 8 | Horizontal scaling | `./scripts/demo-scale-worker.sh 3` → see replicas in Grafana |
+| 4 | Single-zone low EC | dashboard "Force low (demo)" button → triggers low tank → zone-a requests hydration |
+| 5–7 | Multi-zone conflict + refill | dashboard "Trigger contention (all zones)" button → multiple zones request simultaneously; see scoring/queue decisions; use `/tank/set` REST call to refill |
+| 8 | Horizontal scaling | `docker compose up --scale zone-evaluator=3` (or adjust in `docker-compose.yml`) → see replicas in Grafana **Containers** |
 | 9 | Fault tolerance | `docker kill hydroponic-zone-evaluator-2` (one replica) → system keeps running |
 
 ## Project layout

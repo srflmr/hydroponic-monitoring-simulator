@@ -12,7 +12,7 @@ identity_validation:
 
 authentication_backend:
   file:
-    path: /tmp/users_database.yml
+    path: /config/users_database.yml
 
 access_control:
   default_policy: deny

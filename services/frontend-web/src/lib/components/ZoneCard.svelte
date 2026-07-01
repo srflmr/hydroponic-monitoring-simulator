@@ -1,6 +1,7 @@
 <script>
   import Ring from './Ring.svelte';
   import StatusPill from './StatusPill.svelte';
+  import Glossary from './Glossary.svelte';
   import { metric, zoneStatus } from '$lib/data.js';
   import { farm } from '$lib/sim.js';
 
@@ -22,11 +23,20 @@
   <div class="top">
     <div class="title">
       <span class="crop">{zone.name}</span>
-      <span class="sub">Growing: {zone.crop} · Priority {zone.priority}</span>
+      <span class="sub">
+        Growing: {zone.crop} ·
+        <Glossary term="Priority" definition="Operator-assigned weight (1-10) used in the arbitration score — higher priority zones are served first when multiple zones compete for the shared tank.">Priority</Glossary>
+        {zone.priority}
+      </span>
     </div>
     <StatusPill txt={status.txt} soft={status.soft} dot={status.dot} label={status.label} />
   </div>
 
+  <div class="ring-labels">
+    <Glossary term="pH" definition="Acidity of the nutrient solution (0-14 scale). Advisory only in this system — never triggers a critical alert.">pH</Glossary>
+    <Glossary term="EC" definition="Electrical Conductivity (mS/cm) — a proxy for dissolved nutrient concentration in the solution. This is the ONLY signal that drives critical status and nutrient arbitration in this system.">EC</Glossary>
+    <Glossary term="Temp" definition="Water temperature (°C). Advisory only — never triggers a critical alert.">Temp</Glossary>
+  </div>
   <div class="rings">
     <Ring label="pH"   value={ph.value}   pct={ph.pct}   ring={ph.ring}   soft={ph.soft} />
     <Ring label="EC"   value={ec.value}   pct={ec.pct}   ring={ec.ring}   soft={ec.soft} />
@@ -67,6 +77,8 @@
   .crop { font-size: var(--text-lg); font-weight: 700; letter-spacing: -.01em; }
   .sub { font-size: var(--text-xs); color: var(--muted); }
   .rings { display: flex; justify-content: space-between; padding: var(--space-1) var(--space-2); }
+  .ring-labels { display: flex; justify-content: space-between; padding: 0 var(--space-2); }
+  .ring-labels :global(.glossary) { font-size: var(--text-2xs); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
   .level { display: flex; flex-direction: column; gap: var(--space-2); }
   .level-head { display: flex; align-items: baseline; justify-content: space-between; }
   .cap { font-size: var(--text-xs); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }

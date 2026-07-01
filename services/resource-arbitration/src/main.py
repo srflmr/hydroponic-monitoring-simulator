@@ -72,7 +72,7 @@ def _publish_komando(zone_id, request_id, volume, decided_at):
 
 
 _arb_lock = threading.Lock()
-# Satu sumber kebenaran: satu permintaan aktif per zona.
+# Single source of truth: one active request per zone.
 _pending = {}  # zone_id -> {"request": dict, "score": float, "seq": int, "logged": str | None}
 _seq = 0
 
@@ -80,7 +80,7 @@ _seq = 0
 def _score_request(request: dict) -> float:
     priority = get_zone_priority(request["zone_id"])
     if priority is None:
-        priority = 0  # zona tak dikenal -> prioritas terendah, tetap diskor dari kekritisan
+        priority = 0  # unknown zone -> lowest priority, still scored from criticality
     criticality = compute_criticality(
         float(request["current_value"]), float(request["threshold_min"])
     )
@@ -88,9 +88,9 @@ def _score_request(request: dict) -> float:
 
 
 def _normalize_requested_at(request: dict) -> dict:
-    """Pastikan requested_at bisa di-parse; jika tidak, pakai waktu sekarang.
-    Mencegah _parse_iso raise di tengah serve() dan membuat round non-atomik.
-    Nilai kosong/falsy juga diganti dengan waktu sekarang."""
+    """Ensure requested_at is parseable; if not, use the current time.
+    Prevents _parse_iso from raising mid-serve() and making the round non-atomic.
+    Empty/falsy values are also replaced with the current time."""
     ra = request.get("requested_at")
     if ra:
         try:
@@ -201,7 +201,7 @@ def serve() -> None:
                 flush=True,
             )
             _pending.pop(zid, None)
-        else:  # queued / rejected -> tetap pending, dilayani ulang round berikut (incl. saat refill)
+        else:  # queued / rejected -> stays pending, retried next round (incl. on refill)
             p = _pending.get(zid)
             # First unserved decision per episode wins the label; later transitions don't re-log.
             if p is not None and p["logged"] is None:

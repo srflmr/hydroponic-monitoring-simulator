@@ -39,24 +39,24 @@ def engine(monkeypatch):
 
 
 def test_queued_request_served_after_refill(engine):
-    engine["vol"]["v"] = 5.0  # tepat satu alokasi -> satu fulfilled, satu queued
+    engine["vol"]["v"] = 5.0  # exactly one allocation -> one fulfilled, one queued
     main.intake([_req("zone-a", "a1", current=1.0), _req("zone-b", "b1", current=0.5)])
     decisions = [r["decision"] for r in engine["records"]]
     assert "fulfilled" in decisions and "queued" in decisions
-    assert len(main._pending) == 1  # zona yang kalah tetap pending
+    assert len(main._pending) == 1  # the losing zone stays pending
     engine["records"].clear()
     engine["vol"]["v"] = 200.0  # refill
     with main._arb_lock:
         main.serve()
-    assert main._pending == {}  # zona ter-queue kini dilayani
+    assert main._pending == {}  # the queued zone is now served
     assert [r["decision"] for r in engine["records"]] == ["fulfilled"]
 
 
 def test_pending_bounded_per_zone(engine):
-    engine["vol"]["v"] = 0.0  # tangki kering -> tak ada yang dilayani
+    engine["vol"]["v"] = 0.0  # tank is empty -> nothing gets served
     for i in range(20):
         main.intake([_req("zone-b", f"b{i}", current=0.5)])
-    assert len(main._pending) == 1  # satu entri per zona, tak bocor
+    assert len(main._pending) == 1  # one entry per zone, no leak
     assert "zone-b" in main._pending
 
 
@@ -65,13 +65,13 @@ def test_queued_logged_once_per_episode(engine):
     for i in range(5):
         main.intake([_req("zone-b", f"b{i}", current=0.5)])
     unserved = [r for r in engine["records"] if r["decision"] in ("queued", "rejected")]
-    assert len(unserved) == 1  # hanya satu log untuk satu episode
+    assert len(unserved) == 1  # only one log per episode
     assert engine["records"][0]["decision"] == "rejected"
 
 
 def test_invalid_requested_at_keeps_round_atomic(engine):
     engine["vol"]["v"] = 200.0
-    # requested_at rusak tidak boleh meledak di tengah serve; request tetap diproses
+    # a malformed requested_at must not blow up mid-serve; the request is still processed
     main.intake([_req("zone-a", "a1", ts="bukan-tanggal")])
     assert [r["decision"] for r in engine["records"]] == ["fulfilled"]
     assert engine["records"][0]["requested_at"]

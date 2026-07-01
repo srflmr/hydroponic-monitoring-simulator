@@ -259,31 +259,6 @@ services:
       retries: 5
       start_period: 15s
 
-  sensor-simulator-zone-c:
-    build: ./services/sensor-simulator
-    restart: unless-stopped
-    environment:
-      ZONE_ID: zone-c
-      DEVICE_ID: sensor-01
-      MQTT_BROKER_URL: ${MQTT_BROKER_URL}
-      MQTT_USERNAME: sensor_simulator
-      MQTT_PASSWORD: ${SENSOR_SIMULATOR_MQTT_PASSWORD}
-      PUBLISH_INTERVAL_SECONDS: "${PUBLISH_INTERVAL_SECONDS:-4}"
-      INIT_PH: "6.0"
-      INIT_EC: "1.6"
-      INIT_WATER_TEMP_C: "23.0"
-    networks:
-      - internal
-    depends_on:
-      mosquitto:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:3006/health')\""]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
-
   telemetry-ingestion:
     build: ./services/telemetry-ingestion
     restart: unless-stopped

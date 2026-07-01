@@ -70,8 +70,8 @@
       <div class="card">
         <div class="top">
           <div class="title">
-            <span class="crop">{z.crop}</span>
-            <span class="sub">{z.name}</span>
+            <span class="crop">{z.name}</span>
+            <span class="sub">Growing: {z.crop}</span>
           </div>
           <div class="prio">
             <span class="cap">Priority</span>

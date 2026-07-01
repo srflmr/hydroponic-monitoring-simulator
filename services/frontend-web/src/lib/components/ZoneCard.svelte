@@ -21,8 +21,8 @@
 <a class="card" href="/zones/{zone.id}">
   <div class="top">
     <div class="title">
-      <span class="crop">{zone.crop}</span>
-      <span class="sub">{zone.name} · Priority {zone.priority}</span>
+      <span class="crop">{zone.name}</span>
+      <span class="sub">Growing: {zone.crop} · Priority {zone.priority}</span>
     </div>
     <StatusPill txt={status.txt} soft={status.soft} dot={status.dot} label={status.label} />
   </div>

@@ -83,7 +83,7 @@ services:
       start_period: 60s
 
   postgres:
-    image: postgres:16.4-alpine
+    image: postgres:16.14-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -104,7 +104,7 @@ services:
       retries: 5
 
   redis:
-    image: redis:7.4-alpine
+    image: redis:7.4.9-alpine
     restart: unless-stopped
     environment:
       REDIS_TELEMETRY_PASSWORD: ${REDIS_TELEMETRY_PASSWORD}
@@ -132,7 +132,7 @@ services:
       retries: 5
 
   influxdb:
-    image: influxdb:2.7-alpine
+    image: influxdb:2.7.12-alpine
     restart: unless-stopped
     environment:
       DOCKER_INFLUXDB_INIT_MODE: setup

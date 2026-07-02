@@ -8,7 +8,7 @@ A multi-zone hydroponic monitoring platform that automates nutrient allocation f
 
 | Layer | Services |
 |---|---|
-| Custom | telemetry-ingestion, zone-evaluator, zone-config, resource-arbitration, actuator-gateway, dashboard-api, frontend-web, sensor-simulator (×3 zones) |
+| Custom | telemetry-ingestion, zone-evaluator, zone-config, resource-arbitration, actuator-gateway, dashboard-api, frontend-web, sensor-simulator (×2 zones) |
 | Gateway | traefik, authelia |
 | Data | postgres, redis, influxdb, mosquitto |
 | Monitoring | node-exporter (host), cadvisor + docker-stats-exporter (containers), docker-socket-proxy, prometheus, grafana |
@@ -30,7 +30,7 @@ A multi-zone hydroponic monitoring platform that automates nutrient allocation f
 
 ```bash
 cp .env.example .env          # fill in the secrets (per-service DB/Redis/MQTT credentials, Authelia operator + secrets, Influx admin token, Grafana admin password)
-docker compose up -d --build  # ~20 services; wait until all are healthy
+docker compose up -d --build  # 21 services; wait until all are healthy
 docker compose ps
 ```
 

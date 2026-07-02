@@ -8,7 +8,7 @@ pool = ConnectionPool(POSTGRES_URL, min_size=1, max_size=4, open=False)
 
 
 def init() -> None:
-    """Buka connection pool. Dipanggil saat startup, bukan saat import (agar test bisa import db)."""
+    """Open the connection pool. Called at startup, not at import time (so tests can import db)."""
     pool.open()
 
 

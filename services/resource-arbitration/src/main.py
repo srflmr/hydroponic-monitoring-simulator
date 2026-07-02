@@ -102,8 +102,8 @@ def _normalize_requested_at(request: dict) -> dict:
 
 
 def _upsert(request: dict, score: float) -> None:
-    """Sisipkan/perbarui permintaan aktif zona (reading terbaru menang). seq & status
-    'logged' dipertahankan selama zona tetap pending."""
+    """Insert/update a zone's active request (latest reading wins). seq and the
+    'logged' status are preserved as long as the zone stays pending."""
     global _seq
     zid = request["zone_id"]
     p = _pending.get(zid)
@@ -116,7 +116,7 @@ def _upsert(request: dict, score: float) -> None:
 
 
 def _ordered_pending() -> list:
-    """Bangun ordering prioritas (PRD §13) dari _pending via heapq, pop ter-urut skor."""
+    """Build the priority ordering (PRD §13) from _pending via heapq, popped in score order."""
     heap = [(-p["score"], p["seq"], zid) for zid, p in _pending.items()]
     heapq.heapify(heap)
     ordered = []
@@ -171,14 +171,14 @@ def _record(request: dict, decision: str, score, tank_volume_after, decided_at, 
     }
     alert = None
     if decision == "rejected":
-        alert = {"zone_id": request["zone_id"], "message": "Tangki perlu diisi ulang", "severity": "critical"}
+        alert = {"zone_id": request["zone_id"], "message": "Tank needs refilling", "severity": "critical"}
     elif decision == "queued":
-        alert = {"zone_id": request["zone_id"], "message": "Tangki perlu diisi ulang", "severity": "warning"}
+        alert = {"zone_id": request["zone_id"], "message": "Tank needs refilling", "severity": "warning"}
     _emit_event(log_entry, alert)
 
 
 def serve() -> None:
-    """Jalankan satu round keputusan atas semua zona pending. Caller memegang _arb_lock."""
+    """Run one decision round over all pending zones. Caller holds _arb_lock."""
     pending = _ordered_pending()
     if not pending:
         return
@@ -215,7 +215,7 @@ def serve() -> None:
 
 
 def intake(requests: list) -> None:
-    """Skor batch permintaan masuk, upsert per zona, lalu jalankan satu round serve."""
+    """Score an incoming batch of requests, upsert per zone, then run one serve() round."""
     with _arb_lock:
         for request in requests:
             rid = request.get("request_id")

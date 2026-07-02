@@ -39,14 +39,14 @@ def plan_decisions(volume: float, allocation: float, scored: list[dict]) -> dict
 
 
 def build_reason(decision: str, score: float, current_value, threshold_min, top_zone=None) -> str:
-    """Human-readable Indonesian reason string for a decision (for the log feed)."""
+    """Human-readable reason string for a decision (for the log feed)."""
     if decision == "fulfilled":
         return (
-            f"EC {current_value} di bawah ambang minimum {threshold_min}; "
-            f"tangki cukup, alokasi disetujui (skor {score})"
+            f"EC {current_value} is below the minimum threshold {threshold_min}; "
+            f"tank has enough volume, allocation approved (score {score})"
         )
     if decision == "queued":
         if top_zone:
-            return f"Skor {score} kalah dari {top_zone} yang dilayani lebih dulu; menunggu kapasitas tangki"
-        return f"Skor {score}; menunggu kapasitas tangki (akan diproses ulang saat refill)"
-    return f"Tangki tidak cukup (perlu diisi ulang); permintaan ditolak (skor {score})"
+            return f"Score {score} lost to {top_zone}, which is being served first; waiting for tank capacity"
+        return f"Score {score}; waiting for tank capacity (will be retried on refill)"
+    return f"Tank volume insufficient (needs refilling); request rejected (score {score})"

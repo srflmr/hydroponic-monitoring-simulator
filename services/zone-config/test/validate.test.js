@@ -25,7 +25,7 @@ test('validateZoneConfig rejects zone_id with disallowed characters', () => {
     temp_min: 18, temp_max: 26, priority: 5,
   };
   const errors = validateZoneConfig(cfg);
-  assert.ok(errors.some((e) => e.includes('zone_id hanya boleh')));
+  assert.ok(errors.some((e) => e.includes('zone_id may only contain')));
 });
 
 test('validateZoneConfig accepts a canonical zone_id', () => {

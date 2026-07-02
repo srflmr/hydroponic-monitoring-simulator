@@ -4,6 +4,7 @@
   export let logs = [];
   export let title = 'Arbitration log';
   export let variant = 'row';         // 'row' (overview table) | 'stack' (compact list)
+  export let maxHeight = null;        // e.g. '640px' — bounds .items with its own scrollbar instead of growing the page
 </script>
 
 <div class="log">
@@ -12,7 +13,7 @@
     <span class="live"></span>
   </div>
 
-  <div class="items" class:stack={variant === 'stack'}>
+  <div class="items" class:stack={variant === 'stack'} class:scrollable={!!maxHeight} style={maxHeight ? `max-height:${maxHeight}` : ''}>
     {#each logs as l (l.id)}
       {@const d = DECISION[l.decision] ?? { txt: 'var(--muted)', soft: 'var(--hair-2)', dot: 'var(--muted)', label: l.decision ?? 'unknown', sym: '?' }}
       {#if variant === 'row'}
@@ -22,7 +23,10 @@
             <span class="sym" style="background:{d.soft}; color:{d.txt}">{d.sym}</span>
             <span class="label" style="color:{d.txt}">{d.label}</span>
           </div>
-          <span class="crop">{l.crop}</span>
+          <span class="zone">
+            <span class="zname">{l.name}</span>
+            <span class="zcrop">{l.crop}</span>
+          </span>
           <span class="reason">{l.reason}</span>
         </div>
       {:else}
@@ -51,13 +55,26 @@
   .live { width: 7px; height: 7px; border-radius: 50%; background: var(--ok-ring); animation: livePulse 1.8s ease-in-out infinite; }
   .items { display: flex; flex-direction: column; }
 
+  /* Bounded height + its own scrollbar (instead of letting the whole page grow),
+     styled to match the theme rather than a bare default scrollbar. */
+  .items.scrollable {
+    overflow-y: auto; padding-right: var(--space-2);
+    scrollbar-width: thin; scrollbar-color: var(--hair) transparent;
+  }
+  .items.scrollable::-webkit-scrollbar { width: 8px; }
+  .items.scrollable::-webkit-scrollbar-track { background: transparent; }
+  .items.scrollable::-webkit-scrollbar-thumb { background: var(--hair); border-radius: 8px; }
+  .items.scrollable::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
   /* row variant */
   .row { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid var(--hair-2); }
   .time { font-family: var(--mono); font-size: var(--text-sm); color: var(--muted); width: 66px; flex-shrink: 0; }
   .tag { display: flex; align-items: center; gap: var(--space-2); width: 118px; flex-shrink: 0; }
   .sym { width: 18px; height: 18px; border-radius: 6px; font-size: var(--text-2xs); font-weight: 700; display: flex; align-items: center; justify-content: center; }
   .label { font-size: var(--text-sm); font-weight: 600; }
-  .crop { font-size: var(--text-sm); font-weight: 600; color: var(--ink-2); width: 90px; flex-shrink: 0; }
+  .zone { display: flex; flex-direction: column; gap: 1px; width: 100px; flex-shrink: 0; }
+  .zname { font-size: var(--text-sm); font-weight: 600; color: var(--ink-2); }
+  .zcrop { font-size: var(--text-2xs); color: var(--muted); }
   .reason { font-size: var(--text-sm); color: var(--ink-3); flex: 1; }
 
   /* stack variant */

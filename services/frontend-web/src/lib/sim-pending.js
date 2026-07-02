@@ -14,7 +14,7 @@ export function pendingToQueue(pending) {
     alerts: items.map((p) => ({
       zone_id: p.zone_id,
       severity: 'warning',
-      message: 'Menunggu alokasi (tangki)',
+      message: 'Waiting for tank allocation',
     })),
   };
 }

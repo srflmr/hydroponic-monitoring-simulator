@@ -1,20 +1,20 @@
 user sensor_simulator
 topic write hydroponic/+/sensor/reading
-topic read hydroponic/+/aktuator/status
+topic read hydroponic/+/actuator/status
 
 user telemetry_ingestion
 topic read hydroponic/+/sensor/reading
 
 user resource_arbitration
-topic write hydroponic/+/aktuator/komando
-topic write hydroponic/+/arbitrasi/event
+topic write hydroponic/+/actuator/command
+topic write hydroponic/+/arbitration/event
 
 user actuator_gateway
-topic read hydroponic/+/aktuator/komando
-topic write hydroponic/+/aktuator/status
+topic read hydroponic/+/actuator/command
+topic write hydroponic/+/actuator/status
 
 user dashboard_api
 topic read $SYS/#
 topic read hydroponic/+/sensor/reading
-topic read hydroponic/+/arbitrasi/event
-topic read hydroponic/+/aktuator/status
+topic read hydroponic/+/arbitration/event
+topic read hydroponic/+/actuator/status

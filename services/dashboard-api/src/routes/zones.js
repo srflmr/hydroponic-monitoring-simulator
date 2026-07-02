@@ -41,22 +41,22 @@ router.get('/api/zones', async (req, res) => {
 router.get('/api/zones/:zoneId/history', async (req, res) => {
   const param = req.query.param || 'ec';
   if (!ALLOWED_PARAMS.has(param)) {
-    return res.status(400).json({ error: 'invalid_param', message: 'param tidak dikenal' });
+    return res.status(400).json({ error: 'invalid_param', message: 'Unknown param' });
   }
   const { from, to } = req.query;
   if (from !== undefined && !ISO_RE.test(from)) {
-    return res.status(400).json({ error: 'invalid_from', message: 'from harus ISO-8601 UTC' });
+    return res.status(400).json({ error: 'invalid_from', message: 'from must be ISO-8601 UTC' });
   }
   if (to !== undefined && !ISO_RE.test(to)) {
-    return res.status(400).json({ error: 'invalid_to', message: 'to harus ISO-8601 UTC' });
+    return res.status(400).json({ error: 'invalid_to', message: 'to must be ISO-8601 UTC' });
   }
   if (!isValidZoneIdFormat(req.params.zoneId)) {
-    return res.status(400).json({ error: 'invalid_zone_id', message: 'zone_id tidak valid' });
+    return res.status(400).json({ error: 'invalid_zone_id', message: 'Invalid zone_id' });
   }
   try {
     const zones = await fetchZones();
     if (!zones.some((z) => z.zone_id === req.params.zoneId)) {
-      return res.status(404).json({ error: 'zone_not_found', message: 'Zone tidak ditemukan' });
+      return res.status(404).json({ error: 'zone_not_found', message: 'Zone not found' });
     }
     const start = from || '-1h';
     const points = await queryHistory(req.params.zoneId, param, start, to);

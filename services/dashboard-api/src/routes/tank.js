@@ -26,7 +26,7 @@ router.post('/api/tank/refill', async (req, res) => {
 router.post('/api/tank/set', async (req, res) => {
   const v = Number(req.body && req.body.volume);
   if (!Number.isFinite(v) || v < 0) {
-    return res.status(400).json({ error: 'invalid_volume', message: 'volume harus angka >= 0' });
+    return res.status(400).json({ error: 'invalid_volume', message: 'volume must be a number >= 0' });
   }
   try {
     const { status, body } = await forwardTankSet({ volume: v });

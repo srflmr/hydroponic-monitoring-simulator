@@ -34,7 +34,7 @@ function initSockets(httpServer) {
       if (!isValidZoneId(zoneId, validZoneIds)) {
         socket.emit('subscribe:error', {
           error: 'invalid_zone',
-          message: 'zone_id tidak valid',
+          message: 'Invalid zone_id',
         });
         return;
       }

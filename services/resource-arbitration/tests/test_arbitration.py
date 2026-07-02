@@ -41,6 +41,6 @@ def test_dry_tank_keeps_already_queued_as_queued_not_rejected():
 
 
 def test_decisions_are_ordered_highest_score_first():
-    scored = [_scored("zone-c", 0.30, "rc"), _scored("zone-a", 0.48, "ra")]
+    scored = [_scored("zone-b", 0.30, "rb"), _scored("zone-a", 0.48, "ra")]
     out = plan_decisions(200.0, 5.0, scored)
-    assert [d["request"]["zone_id"] for d in out["decisions"]] == ["zone-a", "zone-c"]
+    assert [d["request"]["zone_id"] for d in out["decisions"]] == ["zone-a", "zone-b"]

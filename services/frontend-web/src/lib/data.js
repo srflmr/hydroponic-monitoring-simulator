@@ -24,9 +24,7 @@ export const defaultZones = [
   { id: 'zone-a', name: 'Zone A', crop: 'Kangkung', priority: 1, ph: 6.1, ec: 1.95, temp: 25.2, level: 90,
     th: { phMin: 5.5, phMax: 6.5, ecMin: 1.5, ecMax: 2.5, tempMin: 22, tempMax: 28 } },
   { id: 'zone-b', name: 'Zone B', crop: 'Selada',   priority: 2, ph: 6.0, ec: 0.78, temp: 24.4, level: 78,
-    th: { phMin: 5.5, phMax: 6.5, ecMin: 0.8, ecMax: 1.2, tempMin: 22, tempMax: 28 } },
-  { id: 'zone-c', name: 'Zone C', crop: 'Pakcoy',   priority: 3, ph: 5.8, ec: 1.70, temp: 26.6, level: 84,
-    th: { phMin: 5.5, phMax: 6.5, ecMin: 1.4, ecMax: 2.2, tempMin: 22, tempMax: 28 } }
+    th: { phMin: 5.5, phMax: 6.5, ecMin: 0.8, ecMax: 1.2, tempMin: 22, tempMax: 28 } }
 ];
 
 export const clone = (v) => JSON.parse(JSON.stringify(v));

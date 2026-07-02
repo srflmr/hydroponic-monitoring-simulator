@@ -2,7 +2,7 @@
 import assert from 'node:assert';
 import { mapZone, mapTank, mapLog, splitName, fmtTime } from '../src/lib/mappers.js';
 
-assert.deepStrictEqual(splitName('Zona A - Kangkung'), { name: 'Zona A', crop: 'Kangkung' });
+assert.deepStrictEqual(splitName('Zone A - Kangkung'), { name: 'Zone A', crop: 'Kangkung' });
 assert.deepStrictEqual(splitName('Greenhouse'), { name: 'Greenhouse', crop: 'Greenhouse' });
 
 // fmtTime: converts UTC ISO timestamp to local wall-clock time (explicit tz for determinism)
@@ -12,7 +12,7 @@ assert.strictEqual(fmtTime('', 'UTC'), '', 'empty input returns empty string');
 assert.strictEqual(fmtTime(null, 'UTC'), '', 'null input returns empty string');
 
 const apiZone = {
-  zone_id: 'zone-a', name: 'Zona A - Kangkung', priority: 8,
+  zone_id: 'zone-a', name: 'Zone A - Kangkung', priority: 8,
   ph_min: 5.5, ph_max: 6.5, ec_min: 1.5, ec_max: 2.5, temp_min: 22, temp_max: 28,
   last_reading: { ph: 6.1, ec: 1.95, water_temp_c: 25.2, water_level_pct: 90 },
 };

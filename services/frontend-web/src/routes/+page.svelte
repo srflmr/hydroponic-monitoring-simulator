@@ -11,7 +11,7 @@
       <p>Live sensor telemetry and automatic nutrient arbitration across zones, from one shared tank that always knows who to feed first.</p>
     </div>
     <div class="stats">
-      <div class="stat"><span class="num">3</span><span class="lbl">growing zones</span></div>
+      <div class="stat"><span class="num">2</span><span class="lbl">growing zones</span></div>
       <div class="stat"><span class="num">4</span><span class="lbl">monitored signals</span></div>
       <div class="stat"><span class="num">24/7</span><span class="lbl">arbitration</span></div>
     </div>

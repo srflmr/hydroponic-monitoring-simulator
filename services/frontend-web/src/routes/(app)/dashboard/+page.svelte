@@ -36,7 +36,7 @@
       <TankGauge tank={$farm.tank} serving={servingCount} />
       <PendingQueue />
     </div>
-    <ArbitrationLog logs={logsTop} variant="row" />
+    <ArbitrationLog logs={logsTop} variant="row" fill />
   </div>
 </section>
 
@@ -47,8 +47,12 @@
   .intro .h { font-size: var(--text-xl); font-weight: 700; letter-spacing: -.01em; }
   .intro .s { font-size: var(--text-base); color: var(--ink-3); }
   .zones { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-5); }
-  .bottom { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: var(--space-5); align-items: start; }
-  .side { display: flex; flex-direction: column; gap: var(--space-5); }
+  /* Both columns stretch to the row's height (tallest side's natural content);
+     PendingQueue and ArbitrationLog(fill) each grow to fill their share and
+     scroll internally if their own content runs longer — keeps both columns'
+     bottom edges aligned instead of one trailing empty space or overflowing. */
+  .bottom { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: var(--space-5); }
+  .side { display: flex; flex-direction: column; gap: var(--space-5); min-height: 0; }
 
   .demo {
     border: none; cursor: pointer; padding: var(--space-3) var(--space-4); border-radius: var(--radius-xs);

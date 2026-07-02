@@ -4,16 +4,22 @@
   export let logs = [];
   export let title = 'Arbitration log';
   export let variant = 'row';         // 'row' (overview table) | 'stack' (compact list)
-  export let maxHeight = null;        // e.g. '640px' — bounds .items with its own scrollbar instead of growing the page
+  export let maxHeight = null;        // e.g. '640px' — bounds .items to a fixed height with its own scrollbar
+  export let fill = false;            // grow to fill a stretched grid/flex parent exactly, scrolling internally instead
 </script>
 
-<div class="log">
+<div class="log" class:fill>
   <div class="head">
     <span class="cap">{title}</span>
     <span class="live"></span>
   </div>
 
-  <div class="items" class:stack={variant === 'stack'} class:scrollable={!!maxHeight} style={maxHeight ? `max-height:${maxHeight}` : ''}>
+  <div
+    class="items"
+    class:stack={variant === 'stack'}
+    class:scrollable={!!maxHeight || fill}
+    style={maxHeight ? `max-height:${maxHeight}` : ''}
+  >
     {#each logs as l (l.id)}
       {@const d = DECISION[l.decision] ?? { txt: 'var(--muted)', soft: 'var(--hair-2)', dot: 'var(--muted)', label: l.decision ?? 'unknown', sym: '?' }}
       {#if variant === 'row'}
@@ -50,10 +56,15 @@
     background: var(--surface); border: 1px solid var(--hair); border-radius: var(--radius);
     padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-3);
   }
+  /* fill: this card is a stretched grid/flex item (definite height from its parent) —
+     let .items consume the remaining space via flex instead of the card's own
+     content-driven height, so the card's bottom edge lands exactly at the parent's edge. */
+  .log.fill { height: 100%; min-height: 0; }
   .head { display: flex; align-items: center; gap: var(--space-3); }
   .cap { font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
   .live { width: 7px; height: 7px; border-radius: 50%; background: var(--ok-ring); animation: livePulse 1.8s ease-in-out infinite; }
   .items { display: flex; flex-direction: column; }
+  .log.fill .items { flex: 1; min-height: 0; }
 
   /* Bounded height + its own scrollbar (instead of letting the whole page grow),
      styled to match the theme rather than a bare default scrollbar. */

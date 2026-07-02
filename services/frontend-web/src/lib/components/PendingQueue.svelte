@@ -40,11 +40,22 @@
   .log {
     background: var(--surface); border: 1px solid var(--hair); border-radius: var(--radius);
     padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-3);
+    /* Sits below TankGauge in a flex column (.side) alongside ArbitrationLog(fill) —
+       grow to take the remaining space so the two columns' bottom edges align. */
+    flex: 1; min-height: 0;
   }
   .head { display: flex; align-items: center; gap: var(--space-3); }
   .cap { font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
   .live { width: 7px; height: 7px; border-radius: 50%; background: var(--warn-ring); animation: livePulse 1.8s ease-in-out infinite; }
-  .items { display: flex; flex-direction: column; }
+  .items {
+    display: flex; flex-direction: column;
+    flex: 1; min-height: 0; overflow-y: auto; padding-right: var(--space-2);
+    scrollbar-width: thin; scrollbar-color: var(--hair) transparent;
+  }
+  .items::-webkit-scrollbar { width: 8px; }
+  .items::-webkit-scrollbar-track { background: transparent; }
+  .items::-webkit-scrollbar-thumb { background: var(--hair); border-radius: 8px; }
+  .items::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
   .empty { font-size: var(--text-sm); color: var(--muted); padding: var(--space-2) 0; }
 

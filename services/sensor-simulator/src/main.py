@@ -48,7 +48,7 @@ client = mqtt.Client(client_id=f"sensor-simulator-{ZONE_ID}")
 def _on_connect(c, userdata, flags, rc):
     if rc == 0:
         _connected.set()
-        c.subscribe(f"hydroponic/{ZONE_ID}/aktuator/status")
+        c.subscribe(f"hydroponic/{ZONE_ID}/actuator/status")
 
 
 client.on_connect = _on_connect

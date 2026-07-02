@@ -9,8 +9,8 @@ const {
 } = require('./sockets/broadcast');
 
 const SENSOR_TOPIC = 'hydroponic/+/sensor/reading';
-const ARBITRASI_EVENT_TOPIC = 'hydroponic/+/arbitrasi/event';
-const AKTUATOR_STATUS_TOPIC = 'hydroponic/+/aktuator/status';
+const ARBITRATION_EVENT_TOPIC = 'hydroponic/+/arbitration/event';
+const ACTUATOR_STATUS_TOPIC = 'hydroponic/+/actuator/status';
 
 function startMqtt() {
   const client = mqtt.connect(process.env.MQTT_BROKER_URL, {
@@ -19,7 +19,7 @@ function startMqtt() {
   });
 
   client.on('connect', () => {
-    client.subscribe([SENSOR_TOPIC, ARBITRASI_EVENT_TOPIC, AKTUATOR_STATUS_TOPIC], (err) => {
+    client.subscribe([SENSOR_TOPIC, ARBITRATION_EVENT_TOPIC, ACTUATOR_STATUS_TOPIC], (err) => {
       if (err) console.error('dashboard-api subscribe failed:', err.message);
     });
   });
@@ -40,14 +40,14 @@ function startMqtt() {
           water_temp_c: payload.water_temp_c,
           water_level_pct: payload.water_level_pct,
         });
-      } else if (topic.endsWith('/arbitrasi/event')) {
+      } else if (topic.endsWith('/arbitration/event')) {
         if (payload.log) {
           const name = zoneNameFor(payload.log.zone_id);
           broadcastArbitrationLog(name ? { ...payload.log, zone_name: name } : payload.log);
         }
         if (payload.tank) broadcastTankUpdate(payload.tank);
         if (payload.alert) broadcastAlert(payload.alert);
-      } else if (topic.endsWith('/aktuator/status')) {
+      } else if (topic.endsWith('/actuator/status')) {
         broadcastActuatorStatus(payload);
       }
     } catch (err) {

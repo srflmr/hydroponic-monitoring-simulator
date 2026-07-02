@@ -59,8 +59,8 @@ def _parse_iso(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00"))
 
 
-def _publish_komando(zone_id, request_id, volume, decided_at):
-    topic = f"hydroponic/{zone_id}/aktuator/komando"
+def _publish_command(zone_id, request_id, volume, decided_at):
+    topic = f"hydroponic/{zone_id}/actuator/command"
     payload = {
         "zone_id": zone_id,
         "request_id": request_id,
@@ -131,7 +131,7 @@ def _ordered_pending() -> list:
 
 def _emit_event(log_entry: dict, alert: dict | None) -> None:
     payload = {"log": log_entry, "alert": alert, "tank": _tank_snapshot()}
-    topic = f"hydroponic/{log_entry['zone_id']}/arbitrasi/event"
+    topic = f"hydroponic/{log_entry['zone_id']}/arbitration/event"
     client.publish(topic, json.dumps(payload))
 
 
@@ -194,7 +194,7 @@ def serve() -> None:
         if d["decision"] == "fulfilled":
             tank_manager.set_volume(d["tank_volume_after"])
             _record(req, "fulfilled", d["score"], d["tank_volume_after"], decided_at)
-            _publish_komando(zid, req["request_id"], ALLOCATION_VOLUME_LITER, decided_at)
+            _publish_command(zid, req["request_id"], ALLOCATION_VOLUME_LITER, decided_at)
             print(
                 f"resource-arbitration: decision zone={zid} request={req['request_id']} "
                 f"decision=fulfilled score={d['score']:.3f} tank_after={d['tank_volume_after']}",

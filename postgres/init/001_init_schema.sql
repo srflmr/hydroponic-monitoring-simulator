@@ -48,5 +48,5 @@ CREATE TABLE tank_status (
 INSERT INTO tank_status (id, current_volume, capacity) VALUES (1, 200.0, 200.0);
 
 INSERT INTO zones (zone_id, name, ph_min, ph_max, ec_min, ec_max, temp_min, temp_max, priority) VALUES
-    ('zone-a', 'Zona A - Kangkung', 5.5, 6.5, 1.5, 2.5, 22.0, 28.0, 8),
-    ('zone-b', 'Zona B - Selada',   5.4, 6.0, 0.8, 1.4, 18.0, 22.0, 6);
+    ('zone-a', 'Zone A - Kangkung', 5.5, 6.5, 1.5, 2.5, 22.0, 28.0, 8),
+    ('zone-b', 'Zone B - Selada',   5.4, 6.0, 0.8, 1.4, 18.0, 22.0, 6);

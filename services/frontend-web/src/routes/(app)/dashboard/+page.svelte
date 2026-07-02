@@ -47,7 +47,7 @@
   .intro { display: flex; flex-direction: column; gap: var(--space-1); }
   .intro .h { font-size: var(--text-xl); font-weight: 700; letter-spacing: -.01em; }
   .intro .s { font-size: var(--text-base); color: var(--ink-3); }
-  .zones { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); }
+  .zones { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-5); }
   .bottom { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: var(--space-5); }
   .pending-row { display: grid; grid-template-columns: minmax(0, 380px); gap: var(--space-5); }
 
@@ -59,7 +59,6 @@
   }
   .demo:hover { filter: brightness(1.1); }
 
-  @media (max-width: 1180px) { .zones { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 900px)  { .bottom { grid-template-columns: 1fr; } }
   @media (max-width: 620px)  { .zones { grid-template-columns: 1fr; } }
 </style>

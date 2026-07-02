@@ -130,7 +130,7 @@
   .save { border: none; cursor: pointer; padding: 11px var(--space-5); border-radius: 12px; background: var(--nutrient); color: var(--header); font-family: var(--font); font-size: var(--text-base); font-weight: 700; box-shadow: inset 0 -3px 0 rgba(0,0,0,.1); }
   .save:hover { background: var(--nutrient-strong); }
 
-  .grid { width: 100%; min-width: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); }
+  .grid { width: 100%; min-width: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); }
   .card { min-width: 0; background: var(--surface); border: 1px solid var(--hair); border-radius: var(--radius); padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-5); }
   .top { display: flex; align-items: flex-start; justify-content: space-between; }
   .title { display: flex; flex-direction: column; gap: 3px; }
@@ -164,6 +164,5 @@
   .toast-error .tdot { background: #FFAAAA; }
   .toast span:last-child { font-size: var(--text-base); font-weight: 600; }
 
-  @media (max-width: 1240px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 620px)  { .grid { grid-template-columns: 1fr; } }
 </style>

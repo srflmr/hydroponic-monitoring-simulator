@@ -3,7 +3,7 @@ const { test } = require('node:test');
 const { validateZoneConfig } = require('../src/validate');
 
 const VALID = {
-  zone_id: 'zone-x', name: 'Zona X',
+  zone_id: 'zone-x', name: 'Zone X',
   ph_min: 5.5, ph_max: 6.5, ec_min: 1.5, ec_max: 2.5, temp_min: 22.0, temp_max: 28.0, priority: 8,
 };
 

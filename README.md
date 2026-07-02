@@ -55,4 +55,4 @@ docker compose ps
 
 ## Project layout
 
-`services/` (per-service code) · `traefik/`, `authelia/`, `mosquitto/`, `postgres/init/`, `prometheus/`, `grafana/` (infra config) · `scripts/` (placeholder, demo is UI-driven) · one root `docker-compose.yml`.
+`services/` (per-service code) · `traefik/`, `authelia/`, `mosquitto/`, `postgres/init/`, `prometheus/`, `grafana/` (infra config) · one root `docker-compose.yml`.

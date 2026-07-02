@@ -32,12 +32,11 @@
   </div>
 
   <div class="bottom">
-    <TankGauge tank={$farm.tank} serving={servingCount} />
+    <div class="side">
+      <TankGauge tank={$farm.tank} serving={servingCount} />
+      <PendingQueue />
+    </div>
     <ArbitrationLog logs={logsTop} variant="row" />
-  </div>
-
-  <div class="pending-row">
-    <PendingQueue />
   </div>
 </section>
 
@@ -48,8 +47,8 @@
   .intro .h { font-size: var(--text-xl); font-weight: 700; letter-spacing: -.01em; }
   .intro .s { font-size: var(--text-base); color: var(--ink-3); }
   .zones { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-5); }
-  .bottom { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: var(--space-5); }
-  .pending-row { display: grid; grid-template-columns: minmax(0, 380px); gap: var(--space-5); }
+  .bottom { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+  .side { display: flex; flex-direction: column; gap: var(--space-5); }
 
   .demo {
     border: none; cursor: pointer; padding: var(--space-3) var(--space-4); border-radius: var(--radius-xs);

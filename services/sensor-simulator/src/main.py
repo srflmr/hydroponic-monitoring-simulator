@@ -149,7 +149,7 @@ def simulate(body: SimulateBody):
     if body.param not in PARAM_BOUNDS:
         return JSONResponse(
             status_code=400,
-            content={"error": "invalid_param", "message": "Parameter tidak dikenal"},
+            content={"error": "invalid_param", "message": "Unknown parameter"},
         )
     low, high = PARAM_BOUNDS[body.param]
     value = max(low, min(high, body.value))  # clamp to the sensor's physical range

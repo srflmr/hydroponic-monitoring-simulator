@@ -107,7 +107,7 @@ def current(zone_id: str):
     if data is None:
         return JSONResponse(
             status_code=404,
-            content={"error": "no_evaluation", "message": "Belum ada evaluasi"},
+            content={"error": "no_evaluation", "message": "No evaluation yet"},
         )
     return data
 
